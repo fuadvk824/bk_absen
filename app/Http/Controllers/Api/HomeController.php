@@ -202,6 +202,13 @@ class HomeController extends Controller
                 return response()->json(['message' => 'Shift hari ini tidak ditemukan'], 400);
             }
 
+            $shiftCheckout = Carbon::parse($shiftDetail->checkout_time);
+            if ($checkInTime->gt($shiftCheckout)) {
+                return response()->json([
+                    'message' => 'Tidak bisa check-in setelah jam kerja berakhir'
+                ], 422);
+            }
+
             $imagePath = null;
             if ($request->hasFile('gambar_checkin')) {
                 $imagePath = $imageService->upload($request->file('gambar_checkin'), 'att', $employeeCode, 'attendance');
@@ -278,6 +285,7 @@ class HomeController extends Controller
             return response()->json(['message' => 'Checkin Success'], 201);
         });
     }
+
 
     public function checkOut(Request $request, ImageUploadService $imageService)
     {
