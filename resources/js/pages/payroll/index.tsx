@@ -157,7 +157,7 @@ export default function Index({ payrolls, filters, offices }: Props) {
                             placeholder="Cari nama..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
 
@@ -169,7 +169,7 @@ export default function Index({ payrolls, filters, offices }: Props) {
                                 handleFilterChange(localFilters, setLocalFilters, 'month', Number(value))
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Bulan" />
                             </SelectTrigger>
                             <SelectContent>
@@ -190,7 +190,7 @@ export default function Index({ payrolls, filters, offices }: Props) {
                                 handleFilterChange(localFilters, setLocalFilters, 'year', Number(value))
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Tahun" />
                             </SelectTrigger>
                             <SelectContent>
@@ -208,7 +208,7 @@ export default function Index({ payrolls, filters, offices }: Props) {
                             value={localFilters.status ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'status', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -224,7 +224,7 @@ export default function Index({ payrolls, filters, offices }: Props) {
                             value={localFilters.office_id?.toString() ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'office_id', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih kantor" />
                             </SelectTrigger>
                             <SelectContent>

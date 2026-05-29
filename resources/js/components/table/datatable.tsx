@@ -162,7 +162,7 @@ export function DataTable<TData>({
                             </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="text-xs">
-                            {[5, 10, 25, 50].map((size) => (
+                            {[5, 10, 25, 50, 100, 500].map((size) => (
                                 <SelectItem key={size} value={String(size)} className="text-xs">
                                     {size} rows
                                 </SelectItem>

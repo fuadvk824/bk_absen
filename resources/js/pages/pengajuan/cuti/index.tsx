@@ -43,7 +43,7 @@ interface Props {
 
 export default function Index({ leaves, filters, offices, leaveCategories }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const allColumns = ['employee_name', 'leave_category', 'start_date', 'end_date', 'total_days', 'status'];
 
@@ -63,7 +63,7 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
     });
 
     const handleResetFilters = () => {
-         setIsRefreshing(true);
+        setIsRefreshing(true);
         const defaultFilters = {
             search: '',
             office_id: undefined,
@@ -74,12 +74,16 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
 
         setLocalFilters(defaultFilters);
 
-        router.get(route('leavesubmit.index'), {},  {
+        router.get(
+            route('leavesubmit.index'),
+            {},
+            {
                 replace: true,
                 onFinish: () => setIsRefreshing(false),
-            },);
+            },
+        );
     };
-    
+
     return (
         <AppLayout breadcrumbs={[{ title: 'Pengajuan Cuti', href: route('leavesubmit.index') }]}>
             <Head title="Cuti" />
@@ -89,8 +93,8 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                     <h1 className="text-xl font-semibold">Pengajuan Cuti</h1>
 
                     <div className="flex gap-2">
-                        <Button variant="outline"   onClick={handleResetFilters}>
-                           <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        <Button variant="outline" onClick={handleResetFilters}>
+                            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                             Refresh
                         </Button>
 
@@ -107,7 +111,7 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                             placeholder="Cari..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
 
@@ -117,7 +121,7 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                             value={localFilters.office_id?.toString() ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'office_id', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Kantor" />
                             </SelectTrigger>
                             <SelectContent>
@@ -139,7 +143,7 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                                 handleFilterChange(localFilters, setLocalFilters, 'leave_category_id', value)
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Kategori" />
                             </SelectTrigger>
                             <SelectContent>
@@ -159,7 +163,7 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                             value={localFilters.status ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'status', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih status" />
                             </SelectTrigger>
                             <SelectContent>

@@ -47,8 +47,10 @@ interface Props {
 }
 
 export default function Edit({ user, employee, offices, departments, positions }: Props) {
+    console.log("ini user: ",user.email);
     const { data, setData, put, processing, errors } = useForm({
         name: user?.name ?? '',
+        email: user?.email ?? '',
         jenis_kelamin: user?.jenis_kelamin ?? '',
         nik: user?.nik ?? '',
         tanggal_lahir: user?.tanggal_lahir ?? '',
@@ -117,25 +119,25 @@ export default function Edit({ user, employee, offices, departments, positions }
                 </div>
 
                 <div className="mt-20 grid grid-cols-3 gap-4">
-                    <div className="rounded-xl border border-s-4 border-gray-500 bg-white p-4">
+                    <div className="rounded-xl border border-s-4 border-gray-500 p-4">
                         <p className="text-sm text-muted-foreground">Jabatan</p>
                         <p className="font-semibold">{positions.find((p) => p.id === employee.position_id)?.name ?? '-'}</p>
                     </div>
 
-                    <div className="rounded-xl border border-s-4 border-gray-500 bg-white p-4">
+                    <div className="rounded-xl border border-s-4 border-gray-500 p-4">
                         <p className="text-sm text-muted-foreground">Departemen</p>
                         <p className="font-semibold">
                             {departments.find((d) => d.id === employee.department_id)?.name ?? '-'}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-s-4 border-gray-500 bg-white p-4">
+                    <div className="rounded-xl border border-s-4 border-gray-500 p-4">
                         <p className="text-sm text-muted-foreground">Kantor</p>
                         <p className="font-semibold">{offices.find((o) => o.id === employee.office_id)?.name ?? '-'}</p>
                     </div>
                 </div>
 
-                <form className="flex flex-col gap-6 rounded-xl border bg-white p-6 text-xs">
+                <form className="flex flex-col gap-6 rounded-xl border p-6 text-xs">
                     <div className="flex flex-col gap-6 md:flex-row">
                         <div className="flex-1 space-y-3">
                             <h2 className="text-sm font-semibold">Informasi Personal</h2>
@@ -143,6 +145,11 @@ export default function Edit({ user, employee, offices, departments, positions }
                             <div className="space-y-1">
                                 <Label>Nama</Label>
                                 <Input value={data.name} onChange={(e) => setData('name', e.target.value)} />
+                            </div>
+                            <div>
+                                <Label>Email</Label>
+                                <Input type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} />
+                               
                             </div>
                             <div className="space-y-1">
                                 <Label>Jenis Kelamin</Label>

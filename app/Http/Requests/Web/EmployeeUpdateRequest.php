@@ -26,6 +26,7 @@ class EmployeeUpdateRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email'],
             
             'jenis_kelamin' => ['nullable', Rule::in(['L', 'P'])],
             'nik' => [

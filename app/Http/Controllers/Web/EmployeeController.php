@@ -126,6 +126,7 @@ class EmployeeController extends Controller
         DB::transaction(function () use ($validated, $employee) {
             $employee->user()->update([
                 'name' => $validated['name'],
+                'email' => $validated['email'],
                 'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
                 'nik' => $validated['nik'] ?? null,
                 'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,

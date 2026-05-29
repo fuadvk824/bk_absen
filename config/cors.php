@@ -21,7 +21,6 @@ return [
 
     'allowed_origins' => ['https://absensif.bisakulak.my.id'],
     // 'allowed_origins' => ['*'],
-
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],

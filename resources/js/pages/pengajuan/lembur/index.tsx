@@ -60,7 +60,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
     });
 
     const { handleFilterChange, handleExport } = useTableActions({
-        filters: localFilters,  
+        filters: localFilters,
         indexRoute: 'overtime.index',
         exportRoute: 'overtime.export',
         allColumns,
@@ -114,7 +114,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
                             placeholder="Cari nama karyawan..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
                     <div className="space-y-1">
@@ -123,7 +123,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
                             value={localFilters.office_id?.toString() ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'office_id', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Kantor" />
                             </SelectTrigger>
                             <SelectContent>
@@ -144,7 +144,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
                                 handleFilterChange(localFilters, setLocalFilters, 'department_id', value)
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Departemen" />
                             </SelectTrigger>
                             <SelectContent>
@@ -163,7 +163,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
                             value={localFilters.status ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'status', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -181,7 +181,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
                         <div className="flex items-center gap-2">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="h-7 flex-1 justify-start bg-white p-4 font-normal">
+                                    <Button variant="outline" className="h-7 flex-1 justify-start p-4 font-normal">
                                         <CalendarIcon className="h-3 w-3" />
                                         {localFilters.start_date
                                             ? format(new Date(localFilters.start_date), 'dd/MM/yyyy')
@@ -212,7 +212,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
 
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="h-7 flex-1 justify-start bg-white p-4 font-normal">
+                                    <Button variant="outline" className="h-7 flex-1 justify-start p-4 font-normal">
                                         <CalendarIcon className="h-3 w-3" />
                                         {localFilters.end_date
                                             ? format(new Date(localFilters.end_date), 'dd/MM/yyyy')

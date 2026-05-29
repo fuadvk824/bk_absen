@@ -141,7 +141,7 @@ export default function Index({ attendances, filters, offices, departments, shif
                             placeholder="Cari nama karyawan..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
 
@@ -151,7 +151,7 @@ export default function Index({ attendances, filters, offices, departments, shif
                             value={localFilters.shift_id?.toString() ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'shift_id', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih shift" />
                             </SelectTrigger>
                             <SelectContent>
@@ -170,7 +170,7 @@ export default function Index({ attendances, filters, offices, departments, shif
 
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" className="h-7 w-full justify-between bg-white p-4 font-normal">
+                                <Button variant="outline" className="h-7 w-full justify-between p-4 font-normal">
                                     {localFilters.office_ids.length > 0
                                         ? `${localFilters.office_ids.length} kantor dipilih`
                                         : 'Pilih kantor'}
@@ -221,7 +221,7 @@ export default function Index({ attendances, filters, offices, departments, shif
                                 handleFilterChange(localFilters, setLocalFilters, 'department_id', value)
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih departemen" />
                             </SelectTrigger>
                             <SelectContent>
@@ -241,7 +241,7 @@ export default function Index({ attendances, filters, offices, departments, shif
                             value={localFilters.status ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'status', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -257,7 +257,7 @@ export default function Index({ attendances, filters, offices, departments, shif
                         <div className="flex items-center gap-2">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="h-7 flex-1 justify-start bg-white p-4 font-normal">
+                                    <Button variant="outline" className="h-7 flex-1 justify-start p-4 font-normal">
                                         <CalendarIcon className="h-3 w-3" />
                                         {localFilters.start_date
                                             ? format(new Date(localFilters.start_date), 'dd/MM/yyyy')
@@ -288,7 +288,7 @@ export default function Index({ attendances, filters, offices, departments, shif
 
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="h-7 flex-1 justify-start bg-white p-4 font-normal">
+                                    <Button variant="outline" className="h-7 flex-1 justify-start p-4 font-normal">
                                         <CalendarIcon className="h-3 w-3" />
                                         {localFilters.end_date
                                             ? format(new Date(localFilters.end_date), 'dd/MM/yyyy')

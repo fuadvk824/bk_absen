@@ -127,7 +127,7 @@ export default function Index({ employees, filters, positions, departments, offi
                             placeholder="Cari nama karyawan..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7  p-4 placeholder:text-xs"
                         />
                     </div>
 
@@ -139,7 +139,7 @@ export default function Index({ employees, filters, positions, departments, offi
                                 handleFilterChange(localFilters, setLocalFilters, 'position_id', value)
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4  ">
+                            <SelectTrigger className="h-7  p-4  ">
                                 <SelectValue placeholder="Pilih Jabatan" />
                             </SelectTrigger>
                             <SelectContent  >
@@ -163,7 +163,7 @@ export default function Index({ employees, filters, positions, departments, offi
                                 handleFilterChange(localFilters, setLocalFilters, 'department_id', value)
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4  ">
+                            <SelectTrigger className="h-7  p-4  ">
                                 <SelectValue placeholder="Pilih departemen" />
                             </SelectTrigger>
                             <SelectContent >
@@ -185,7 +185,7 @@ export default function Index({ employees, filters, positions, departments, offi
                             value={localFilters.office_id?.toString() ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'office_id', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4   ">
+                            <SelectTrigger className="h-7  p-4   ">
                                 <SelectValue placeholder="Pilih kantor" />
                             </SelectTrigger>
                             <SelectContent  >
@@ -207,7 +207,7 @@ export default function Index({ employees, filters, positions, departments, offi
                             value={localFilters.status ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'status', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4 ">
+                            <SelectTrigger className="h-7  p-4 ">
                                 <SelectValue placeholder="Pilih Status" />
                             </SelectTrigger>
                             <SelectContent >

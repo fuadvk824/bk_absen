@@ -110,7 +110,9 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
         ->name('workschedule.')
         ->group(function () {
             Route::get('/', [WorkScheduleController::class, 'index'])->name('index');
-            Route::patch('/{id}', [WorkScheduleController::class, 'updateDay'])->name('updateDay');
+            Route::patch('/day/{id}', [WorkScheduleController::class, 'updateDay'])->name('updateDay');
+            Route::patch('/bulk-update', [WorkScheduleController::class, 'bulkUpdate'])
+                ->name('bulkUpdate');
         });
 
     Route::prefix('leave')

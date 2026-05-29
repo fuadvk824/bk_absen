@@ -74,7 +74,7 @@ export default function Create({ offices, positions, departments }: Props) {
         >
             <Head title="Tambah Karyawan" />
 
-            <form onSubmit={submit} className="max-w-4xl space-y-6 rounded bg-white p-6 shadow">
+            <form onSubmit={submit} className="max-w-4xl space-y-6 rounded p-6 shadow">
                 <h1 className="text-xl font-semibold">Tambah Karyawan - ui belum selesai di perbaiki</h1>
 
                 <div className="grid grid-cols-2 gap-4">

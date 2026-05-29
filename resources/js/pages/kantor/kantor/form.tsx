@@ -21,7 +21,7 @@ export default function OfficeForm({ data,existingImage, setData, errors, proces
     const isValid = data.name.trim() !== '';
 
     return (
-        <form onSubmit={onSubmit} className="w-full space-y-6 rounded bg-white p-6 shadow">
+        <form onSubmit={onSubmit} className="w-full space-y-6 rounded p-6 shadow">
             <h1 className="text-xl font-semibold">{submitLabel} Kantor - ui belum selesai di perbaiki</h1>
             <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">

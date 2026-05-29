@@ -103,7 +103,7 @@ const [isRefreshing, setIsRefreshing] = useState(false);
                             placeholder="Cari posisi jabatan..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
                 </div>

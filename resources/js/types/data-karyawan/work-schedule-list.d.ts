@@ -24,4 +24,5 @@ export interface WorkSchedule {
     work_schedule: WorkScheduleMonth[];
 
     dayMap?: Record<string, WorkScheduleDay>;
+    is_bulk?: boolean;
 }

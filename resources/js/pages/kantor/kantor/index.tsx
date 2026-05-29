@@ -95,7 +95,7 @@ export default function Index({ offices, filters }: Props) {
                             placeholder="Cari nama kantor..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
                     <div className="space-y-1">
@@ -104,7 +104,7 @@ export default function Index({ offices, filters }: Props) {
                             value={localFilters.status ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'status', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Status Office" />
                             </SelectTrigger>
                             <SelectContent>

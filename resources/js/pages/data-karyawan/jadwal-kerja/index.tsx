@@ -52,6 +52,9 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
     const [isRefreshing, setIsRefreshing] = useState(false);
     const allColumns = ['employee_code', 'employee_name'];
 
+    const today = new Date();
+    const defaultMonth = today.getDate() >= 26 ? today.getMonth() + 1 : today.getMonth();
+
     const [localFilters, setLocalFilters] = useState<{
         search: string;
         office_id?: number;
@@ -61,7 +64,7 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
     }>({
         search: filters.search ?? '',
         office_id: filters.office_id ?? undefined,
-        month: filters.month ?? new Date().getMonth() + 1,
+        month: filters.month ?? defaultMonth,
         year: filters.year ?? new Date().getFullYear(),
         perPage: filters.perPage ?? 10,
     });
@@ -75,7 +78,6 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
 
     const employeesOptimized = employees.data.map((emp) => {
         const schedule = emp.work_schedule?.[0] ?? null;
-
         const dayMap: Record<string, any> = {};
 
         schedule?.days?.forEach((d) => {
@@ -88,21 +90,38 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
         };
     });
 
-    const columns = useMemo(() => columnWorkSchedules(periodDates, shifts), [periodDates, shifts]);
+    const bulkRow: WorkSchedule = {
+        id: 0, 
+        name: 'Atur Semua',
+        shift: {} as Shift, 
+        work_schedule: [],
+        dayMap: {},
+        is_bulk: true,
+    };
+
+    const employeesWithBulk = [bulkRow, ...employeesOptimized];
+  
+    const columns = useMemo(
+        () =>
+            columnWorkSchedules(periodDates, shifts, {
+                office_id: localFilters.office_id,
+            }),
+        [periodDates, shifts, localFilters.office_id],
+    );
 
     const months = [
-        { value: 1, label: '26 Des - 25 Jan' },
-        { value: 2, label: '26 Jan - 25 Feb' },
-        { value: 3, label: '26 Feb - 25 Mar' },
-        { value: 4, label: '26 Mar - 25 Apr' },
-        { value: 5, label: '26 Apr - 25 Mei' },
-        { value: 6, label: '26 Mei - 25 Jun' },
-        { value: 7, label: '26 Jun - 25 Jul' },
-        { value: 8, label: '26 Jul - 25 Ags' },
-        { value: 9, label: '26 Ags - 25 Sep' },
-        { value: 10, label: '26 Sep - 25 Okt' },
-        { value: 11, label: '26 Okt - 25 Nov' },
-        { value: 12, label: '26 Nov - 25 Des' },
+        { value: 12, label: '26 Des - 25 Jan' },
+        { value: 1, label: '26 Jan - 25 Feb' },
+        { value: 2, label: '26 Feb - 25 Mar' },
+        { value: 3, label: '26 Mar - 25 Apr' },
+        { value: 4, label: '26 Apr - 25 Mei' },
+        { value: 5, label: '26 Mei - 25 Jun' },
+        { value: 6, label: '26 Jun - 25 Jul' },
+        { value: 7, label: '26 Jul - 25 Ags' },
+        { value: 8, label: '26 Ags - 25 Sep' },
+        { value: 9, label: '26 Sep - 25 Okt' },
+        { value: 10, label: '26 Okt - 25 Nov' },
+        { value: 11, label: '26 Nov - 25 Des' },
     ];
 
     const currentYear = new Date().getFullYear();
@@ -159,7 +178,7 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
                             value={localFilters.search ?? ''}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
                             placeholder="Cari nama..."
-                            className="h-7 bg-white p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
                     <div className="space-y-1">
@@ -168,7 +187,7 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
                             value={localFilters.office_id?.toString() ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'office_id', value)}
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih kantor" />
                             </SelectTrigger>
                             <SelectContent>
@@ -189,7 +208,7 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
                                 handleFilterChange(localFilters, setLocalFilters, 'month', Number(value))
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Bulan" />
                             </SelectTrigger>
                             <SelectContent>
@@ -210,7 +229,7 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
                                 handleFilterChange(localFilters, setLocalFilters, 'year', Number(value))
                             }
                         >
-                            <SelectTrigger className="h-7 bg-white p-4">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Tahun" />
                             </SelectTrigger>
                             <SelectContent>
@@ -226,14 +245,14 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
 
                 <DataTable<WorkSchedule>
                     columns={columns}
-                    data={employeesOptimized}
+                    // data={employeesOptimized}
+                    data={employeesWithBulk}
                     meta={employees.meta}
                     columnVisibility={columnVisibility}
                     onColumnVisibilityChange={setColumnVisibility}
                     perPage={localFilters.perPage}
                     onPerPageChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'perPage', value)}
                 />
-               
             </div>
         </AppLayout>
     );

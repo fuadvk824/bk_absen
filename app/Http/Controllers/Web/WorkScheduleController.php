@@ -18,13 +18,21 @@ class WorkScheduleController extends Controller
     {
         $perPage = $request->get('perPage', 10);
 
-        $month = $request->get('month', now()->month);
-        $year = $request->get('year', now()->year);
+        $today = now();
+
+        if ($today->day >= 26) {
+            $month = $request->get('month', $today->month);
+            $year = $request->get('year', $today->year);
+        } else {
+            $prev = $today->copy()->subMonth();
+            $month = $request->get('month', $prev->month);
+            $year = $request->get('year', $prev->year);
+        }
 
         $search = $request->get('search');
         $officeId = $request->get('office_id');
 
-        $periodStart = Carbon::create($year, $month, 26)->subMonth();
+        $periodStart = Carbon::create($year, $month, 26);
         $periodEnd = $periodStart->copy()->addMonth()->day(25);
 
         $periodLabel = $periodStart->translatedFormat('d F') . ' - ' . $periodEnd->translatedFormat('d F Y');
@@ -95,10 +103,11 @@ class WorkScheduleController extends Controller
         }
 
         $now = now();
-        $currentStart = Carbon::create($now->year, $now->month, 26)->subMonth();
-        $currentEnd = $currentStart->copy()->addMonth()->day(25);
+        // $currentStart = Carbon::create($now->year, $now->month, 26)->subMonth();
+        // $currentEnd = $currentStart->copy()->addMonth()->day(25);
 
-        if ($startPeriod->ne($currentStart) || $endPeriod->ne($currentEnd)) {
+        // if ($startPeriod->ne($currentStart) || $endPeriod->ne($currentEnd)) 
+        if ($now->lt($startPeriod) || $now->gt($endPeriod)) {
             return redirect()->back()->with('error', 'Tidak bisa mengubah periode yang sudah lewat.');
         }
 
@@ -109,26 +118,58 @@ class WorkScheduleController extends Controller
 
         $day->update($data);
 
-        return redirect()->route('workschedule.index')->with('success', 'Jadwal berhasil diperbarui');
+        return back()->with('success', 'Jadwal berhasil diperbarui');
     }
 
-    // public function updateDay(Request $request, $id)
-    // {
-    //     $day = WorkScheduleDay::findOrFail($id);
+    public function bulkUpdate(Request $request)
+    {
+        $data = $request->validate([
+            'date' => 'required|date',
+            'office_id' => 'nullable|exists:offices,id',
+            'shift_id' => 'nullable|exists:shifts,id',
+            'is_off' => 'required|boolean',
+        ]);
 
-    //     $scheduleDate = Carbon::parse($day->work_date);
+        $date = Carbon::parse($data['date']);
+        $now = now();
 
-    //     if ($scheduleDate->lt(now()->startOfDay())) {
-    //         return redirect()->back()->with('error', 'Jadwal yang sudah lewat tidak bisa diubah.');
-    //     }
+        $officeId = $request->input('office_id');
 
-    //     $data = $request->validate([
-    //         'shift_id' => 'nullable|exists:shifts,id',
-    //         'is_off' => 'boolean',
-    //     ]);
+        $employees = Employee::query()
+            ->when($officeId, fn($q) => $q->where('office_id', $officeId))
+            ->pluck('id');
 
-    //     $day->update($data);
+        $workScheduleDays = WorkScheduleDay::with('workSchedule')
+            ->whereDate('work_date', $date)
+            ->whereHas('workSchedule', function ($q) use ($employees) {
+                $q->whereIn('employee_id', $employees);
+            })
+            ->get();
 
-    //     return redirect()->route('workschedule.index')->with('success', 'Jadwal berhasil diperbarui');
-    // }
+        $updated = 0;
+        $skipped = 0;
+
+        foreach ($workScheduleDays as $day) {
+            $startPeriod = Carbon::parse($day->workSchedule->start_date);
+            $endPeriod = Carbon::parse($day->workSchedule->end_date);
+
+            if ($now->lt($startPeriod) || $now->gt($endPeriod)) {
+                $skipped++;
+                continue;
+            }
+
+            $day->update([
+                'shift_id' => $data['is_off'] ? null : $data['shift_id'],
+                'is_off' => $data['is_off'],
+            ]);
+
+            $updated++;
+        }
+
+        if ($updated === 0) {
+            return back()->with('error', 'Tidak ada jadwal yang bisa diupdate (semua sudah lewat periode).');
+        }
+
+        return back()->with('success', "Bulk update berhasil. Updated: {$updated}, Skipped: {$skipped}");
+    }
 }

@@ -149,7 +149,7 @@ export default function Index({ salaries, employees, filters }: Props) {
                             placeholder="Cari nama karyawan..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-8 bg-white placeholder:text-xs"
+                            className="h-8 placeholder:text-xs"
                         />
                     </div>
 
@@ -161,7 +161,7 @@ export default function Index({ salaries, employees, filters }: Props) {
                             placeholder="0"
                             value={localFilters.min_salary}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'min_salary', e.target.value)}
-                            className="h-8 [appearance:textfield] bg-white placeholder:text-xs [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            className="h-8 [appearance:textfield] placeholder:text-xs [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         />
                     </div>
 
@@ -173,7 +173,7 @@ export default function Index({ salaries, employees, filters }: Props) {
                             placeholder="0"
                             value={localFilters.max_salary}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'max_salary', e.target.value)}
-                            className="h-8 [appearance:textfield] bg-white placeholder:text-xs [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            className="h-8 [appearance:textfield] placeholder:text-xs [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         />
                     </div>
                 </div>
