@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Services;
+
+use Google\Client;
+use Google\Service\Drive;
+use Google\Service\Drive\DriveFile;
+
+class GoogleDriveService
+{
+    protected Drive $drive;
+
+    public function __construct()
+    {
+        $client = new Client();
+
+        $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+        $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+
+        $client->refreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
+
+        $this->drive = new Drive($client);
+    }
+
+    public function upload($localFile, $filename)
+    {
+        $file = new DriveFile();
+
+        $file->setName($filename);
+
+        $file->setParents([
+            env('GOOGLE_DRIVE_FOLDER_ID')
+        ]);
+
+        $content = file_get_contents($localFile);
+
+        $result = $this->drive->files->create(
+            $file,
+            [
+                'data' => $content,
+                'mimeType' => 'application/octet-stream',
+                'uploadType' => 'multipart'
+            ]
+        );
+
+        // Simpan hanya 7 backup terbaru
+        $this->deleteOldBackups(7);
+
+        return $result;
+    }
+    public function deleteOldBackups($keep = 7)
+    {
+        $folderId = env('GOOGLE_DRIVE_FOLDER_ID');
+
+        $files = $this->drive->files->listFiles([
+            'q' => "'{$folderId}' in parents and trashed = false",
+            'fields' => 'files(id,name,createdTime)',
+            'orderBy' => 'createdTime desc'
+        ]);
+
+        $files = $files->getFiles();
+
+        if (count($files) <= $keep) {
+            return;
+        }
+
+        foreach (array_slice($files, $keep) as $file) {
+            $this->drive->files->delete($file->getId());
+        }
+    }
+}
+
