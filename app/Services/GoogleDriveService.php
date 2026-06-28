@@ -22,7 +22,7 @@ class GoogleDriveService
         $this->drive = new Drive($client);
     }
 
-    public function upload($localFile, $filename)
+    public function upload($localFile, $filename, $keep, $prefix)
     {
         $file = new DriveFile();
 
@@ -43,17 +43,17 @@ class GoogleDriveService
             ]
         );
 
-        // Simpan hanya 7 backup terbaru
-        $this->deleteOldBackups(7);
+        $this->deleteOldBackups($prefix, $keep);
 
         return $result;
     }
-    public function deleteOldBackups($keep = 7)
+
+    public function deleteOldBackups($prefix, $keep)
     {
         $folderId = env('GOOGLE_DRIVE_FOLDER_ID');
 
         $files = $this->drive->files->listFiles([
-            'q' => "'{$folderId}' in parents and trashed = false",
+            'q' => "'{$folderId}' in parents and trashed = false and name contains '{$prefix}'",
             'fields' => 'files(id,name,createdTime)',
             'orderBy' => 'createdTime desc'
         ]);
@@ -69,4 +69,3 @@ class GoogleDriveService
         }
     }
 }
-

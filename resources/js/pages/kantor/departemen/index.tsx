@@ -76,24 +76,26 @@ export default function Index({ departments, filters }: Props) {
             <Head title="Departemen" />
 
             <div className="space-y-4 p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h1 className="text-xl font-semibold">Data Departemen</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-xl font-semibold">
+                        <span className="hidden sm:inline">Data</span> Departemen
+                    </h1>
 
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
                         <Button
                             variant="outline"
                             onClick={() => handleExport(columnVisibility)}
                             className="cursor-pointer text-xs"
                         >
-                            <FileSpreadsheet className="h-4 w-4" /> Export
+                            <FileSpreadsheet className="h-4 w-4" /> <span className="hidden sm:block">Export</span>
                         </Button>
 
                         <Button className="cursor-pointer text-xs" onClick={openCreate}>
-                            <Cog className="h-4 w-4" /> Tambah
+                            <Cog className="h-4 w-4" /> <span className="hidden sm:block">Tambah</span>
                         </Button>
                     </div>
                 </div>

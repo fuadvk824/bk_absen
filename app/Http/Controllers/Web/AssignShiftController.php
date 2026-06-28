@@ -34,7 +34,7 @@ class AssignShiftController extends Controller
 
         $now = Carbon::now();
 
-        if ($now->day >= 26) {
+        if ($now->day >= 21) {
             $startPeriod = $now->copy()->day(26);
             $endPeriod = $now->copy()->addMonth()->day(25);
         } else {
@@ -70,7 +70,7 @@ class AssignShiftController extends Controller
 
         $today = now();
 
-        if ($today->day >= 26) {
+        if ($today->day >= 21) {
             $startDate = Carbon::create($today->year, $today->month, 26);
         } else {
             $startDate = Carbon::create($today->year, $today->month, 26)->subMonth();
@@ -146,96 +146,5 @@ class AssignShiftController extends Controller
 
         return back()->with('success', 'Shift berhasil di-assign dan jadwal berhasil dibuat');
     }
-    // public function patch(Request $request, Shift $shift)
-    // {
-    //     $request->validate([
-    //         'employee_ids' => 'required|array',
-    //         'employee_ids.*' => 'exists:employees,id',
-
-    //         'use_custom_date' => 'nullable|boolean',
-    //         'start_date' => 'nullable|date',
-    //         'end_date' => 'nullable|date|after_or_equal:start_date',
-    //     ]);
-
-    //     $today = now();
-
-    //     // if ($today->day <= 20) {
-    //     //     return back()->with('error', 'Generate jadwal hanya bisa dilakukan mulai tanggal 21');
-    //     // }
-
-    //     $startDate = Carbon::create($today->year, $today->month, 26);
-    //     $endDate = $startDate->copy()->addMonth()->day(25);
-
-    //     DB::transaction(function () use ($request, $shift, $startDate, $endDate) {
-    //         Employee::whereIn('id', $request->employee_ids)->update([
-    //             'shift_id' => $shift->id,
-    //         ]);
-
-    //         $dayNameMap = [
-    //             'monday' => 'senin',
-    //             'tuesday' => 'selasa',
-    //             'wednesday' => 'rabu',
-    //             'thursday' => 'kamis',
-    //             'friday' => 'jumat',
-    //             'saturday' => 'sabtu',
-    //             'sunday' => 'minggu',
-    //         ];
-
-    //         $shiftDetails = $shift->shiftDetails->keyBy(function ($item) {
-    //             return strtolower($item->day_of_week);
-    //         });
-
-    //         foreach ($request->employee_ids as $employeeId) {
-    //             $workSchedule = WorkSchedule::updateOrCreate(
-    //                 [
-    //                     'employee_id' => $employeeId,
-    //                     'start_date' => $startDate->toDateString(),
-    //                     'end_date' => $endDate->toDateString(),
-    //                 ],
-    //                 [
-    //                     'shift_id' => $shift->id,
-    //                 ],
-    //             );
-
-    //             $workSchedule->workScheduleDays()->delete();
-
-    //             $totalWorkDays = 0;
-    //             $totalOffDays = 0;
-
-    //             for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
-    //                 $dayName = $dayNameMap[strtolower($date->format('l'))];
-
-    //                 $detail = $shiftDetails[$dayName] ?? null;
-
-    //                 $isOff = !$detail || $detail->is_active == 0;
-
-    //                 if ($isOff) {
-    //                     $totalOffDays++;
-    //                 } else {
-    //                     $totalWorkDays++;
-    //                 }
-
-    //                 WorkScheduleDay::create([
-    //                     'work_schedule_id' => $workSchedule->id,
-
-    //                     'shift_id' => $isOff ? null : $shift->id,
-
-    //                     'work_date' => $date->toDateString(),
-
-    //                     'is_off' => $isOff,
-
-    //                     'note' => null,
-    //                 ]);
-    //             }
-
-    //             $workSchedule->update([
-    //                 'total_work_days' => $totalWorkDays,
-    //                 'total_off_days' => $totalOffDays,
-    //             ]);
-    //         }
-    //     });
-
-    //     return back()->with('success', 'Shift berhasil di-assign dan jadwal berhasil dibuat');
-    // }
-
+   
 }

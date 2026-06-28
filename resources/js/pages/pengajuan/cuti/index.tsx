@@ -95,11 +95,11 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters}>
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                             <span className="hidden sm:block">Refresh</span>
                         </Button>
 
                         <Button variant="outline" disabled onClick={() => handleExport(columnVisibility)}>
-                            <FileSpreadsheet className="h-4 w-4" /> Export
+                            <FileSpreadsheet className="h-4 w-4" /> <span className="hidden sm:block">Export</span>
                         </Button>
                     </div>
                 </div>

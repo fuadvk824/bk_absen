@@ -65,18 +65,18 @@ export default function Index({ shifts, filters }: Props) {
                     <div className="flex flex-wrap gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                             <span className="hidden sm:block">Refresh</span>
                         </Button>
                         <Button variant="outline" onClick={() => handleExport(columnVisibility)}>
                             <FileSpreadsheet className="h-4 w-4" />
-                            Export
+                            <span className="hidden sm:block">Export</span>
                         </Button>
 
                         <Link href={route('shift.create')}>
                             <Button>
                                 {' '}
                                 <AlarmClockPlus className="h-4 w-4" />
-                                Shift
+                                <span className="hidden sm:block">Shift</span>
                             </Button>
                         </Link>
                     </div>

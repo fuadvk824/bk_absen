@@ -91,16 +91,16 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
     });
 
     const bulkRow: WorkSchedule = {
-        id: 0, 
+        id: 0,
         name: 'Atur Semua',
-        shift: {} as Shift, 
+        shift: {} as Shift,
         work_schedule: [],
         dayMap: {},
         is_bulk: true,
     };
 
     const employeesWithBulk = [bulkRow, ...employeesOptimized];
-  
+
     const columns = useMemo(
         () =>
             columnWorkSchedules(periodDates, shifts, {
@@ -155,18 +155,17 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
 
             <div className="space-y-4 p-5">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-xl font-semibold">Jadwal Kerja </h1>
-                        <span>-</span>
-                        <span className="text-sm">{periodLabel}</span>
+                    <div className="flex flex-col items-baseline gap-0 sm:flex-row sm:items-center sm:gap-2">
+                        <h1 className="text-lg font-semibold sm:text-xl">Jadwal Kerja </h1>
+                        <span className="text-xs text-muted-foreground sm:text-sm">({periodLabel})</span>
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
                         <Button variant="outline" onClick={() => handleExport(columnVisibility)} className="cursor-pointer">
-                            <FileSpreadsheet className="h-4 w-4" /> Export
+                            <FileSpreadsheet className="h-4 w-4" /> <span className="hidden sm:block">Export</span>
                         </Button>
                     </div>
                 </div>

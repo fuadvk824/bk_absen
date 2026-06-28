@@ -74,16 +74,16 @@ export default function Index({ offices, filters }: Props) {
                     <div className="flex flex-wrap gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                              <span className="hidden sm:block">Refresh</span>
                         </Button>
                         <Button variant="outline" onClick={() => handleExport(columnVisibility)}>
                             <FileSpreadsheet className="h-4 w-4" />
-                            Export
+                              <span className="hidden sm:block">Export</span>
                         </Button>
                         <Link href={route('office.create')}>
                             <Button>
                                 <HousePlus className="h-4 w-4" />
-                                Tambah
+                                <span className="hidden sm:block">Tambah</span>
                             </Button>
                         </Link>
                     </div>

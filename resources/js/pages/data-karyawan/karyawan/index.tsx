@@ -41,7 +41,7 @@ interface Props {
     offices: Option[];
 }
 
-export default function Index({ employees, filters, totalEmployees,  positions, departments, offices }: Props) {
+export default function Index({ employees, filters, totalEmployees, positions, departments, offices }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [isRefreshing, setIsRefreshing] = useState(false);
     const allColumns = [
@@ -75,7 +75,7 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
     });
 
     const handleResetFilters = () => {
-          setIsRefreshing(true);
+        setIsRefreshing(true);
         const defaultFilters = {
             search: '',
             office_id: undefined,
@@ -87,10 +87,14 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
 
         setLocalFilters(defaultFilters);
 
-        router.get(route('employee.index'), {},   {
+        router.get(
+            route('employee.index'),
+            {},
+            {
                 replace: true,
                 onFinish: () => setIsRefreshing(false),
-            },);
+            },
+        );
     };
 
     return (
@@ -99,24 +103,24 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
 
             <div className="space-y-4 p-5">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-semibold">Data Karyawan ({totalEmployees})</h1>
+                    <h1 className="text-xl font-semibold">
+                        {' '}
+                        <span className="hidden sm:inline">Data</span> Karyawan ({totalEmployees})
+                    </h1>
 
                     <div className="flex gap-2">
-                        <Button variant="outline"  onClick={handleResetFilters} className="cursor-pointer">
-                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                        <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
+                            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => handleExport(columnVisibility)}
-                            
-                        >
-                            <FileSpreadsheet className="h-4 w-4" />Export
+                        <Button variant="outline" onClick={() => handleExport(columnVisibility)}>
+                            <FileSpreadsheet className="h-4 w-4" />
+                            <span className="hidden sm:block">Export</span>
                         </Button>
 
                         <Link href={route('employee.create')}>
-                            <Button >
-                                <UserPlus className="h-4 w-4" />Tambah
+                            <Button>
+                                <UserPlus className="h-4 w-4" /> <span className="hidden sm:block">Tambah</span>
                             </Button>
                         </Link>
                     </div>
@@ -129,7 +133,7 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
                             placeholder="Cari nama karyawan..."
                             value={localFilters.search}
                             onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7  p-4 placeholder:text-xs"
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
 
@@ -141,15 +145,13 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
                                 handleFilterChange(localFilters, setLocalFilters, 'position_id', value)
                             }
                         >
-                            <SelectTrigger className="h-7  p-4  ">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Jabatan" />
                             </SelectTrigger>
-                            <SelectContent  >
-                                <SelectItem value="all"  >
-                                    Semua Jabatan
-                                </SelectItem>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Jabatan</SelectItem>
                                 {positions.map((pos) => (
-                                    <SelectItem key={pos.id} value={pos.id.toString()}  >
+                                    <SelectItem key={pos.id} value={pos.id.toString()}>
                                         {pos.name}
                                     </SelectItem>
                                 ))}
@@ -165,15 +167,13 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
                                 handleFilterChange(localFilters, setLocalFilters, 'department_id', value)
                             }
                         >
-                            <SelectTrigger className="h-7  p-4  ">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih departemen" />
                             </SelectTrigger>
-                            <SelectContent >
-                                <SelectItem   value="all">
-                                    Semua Departemen
-                                </SelectItem>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Departemen</SelectItem>
                                 {departments.map((dep) => (
-                                    <SelectItem key={dep.id} value={dep.id.toString()}  >
+                                    <SelectItem key={dep.id} value={dep.id.toString()}>
                                         {dep.name}
                                     </SelectItem>
                                 ))}
@@ -187,15 +187,13 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
                             value={localFilters.office_id?.toString() ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'office_id', value)}
                         >
-                            <SelectTrigger className="h-7  p-4   ">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih kantor" />
                             </SelectTrigger>
-                            <SelectContent  >
-                                <SelectItem  value="all">
-                                    Semua Kantor
-                                </SelectItem>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Kantor</SelectItem>
                                 {offices.map((office) => (
-                                    <SelectItem key={office.id} value={office.id.toString()} >
+                                    <SelectItem key={office.id} value={office.id.toString()}>
                                         {office.name}
                                     </SelectItem>
                                 ))}
@@ -209,25 +207,15 @@ export default function Index({ employees, filters, totalEmployees,  positions, 
                             value={localFilters.status ?? 'all'}
                             onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'status', value)}
                         >
-                            <SelectTrigger className="h-7  p-4 ">
+                            <SelectTrigger className="h-7 p-4">
                                 <SelectValue placeholder="Pilih Status" />
                             </SelectTrigger>
-                            <SelectContent >
-                                <SelectItem value="all" >
-                                    Semua Status
-                                </SelectItem>
-                                <SelectItem value="new" >
-                                    New
-                                </SelectItem>
-                                <SelectItem value="magang" >
-                                    Magang/Training
-                                </SelectItem>
-                                <SelectItem value="kontrak" >
-                                    Kontrak
-                                </SelectItem>
-                                <SelectItem value="inactive" >
-                                    Inactive
-                                </SelectItem>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Status</SelectItem>
+                                <SelectItem value="new">New</SelectItem>
+                                <SelectItem value="magang">Magang/Training</SelectItem>
+                                <SelectItem value="kontrak">Kontrak</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

@@ -122,7 +122,7 @@ export default function Index({ salaries, employees, filters }: Props) {
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                             <span className="hidden sm:block">Refresh</span>
                         </Button>
 
                         <Button
@@ -131,12 +131,12 @@ export default function Index({ salaries, employees, filters }: Props) {
                             className="cursor-pointer text-xs"
                         >
                             <FileSpreadsheet className="h-4 w-4" />
-                            Export
+                            <span className="hidden sm:block">Export</span>
                         </Button>
 
                         <Button className="cursor-pointer text-xs" onClick={openCreate}>
                             <BadgeDollarSign className="h-4 w-4" />
-                            Tambah
+                            <span className="hidden sm:block">Tambah</span>
                         </Button>
                     </div>
                 </div>

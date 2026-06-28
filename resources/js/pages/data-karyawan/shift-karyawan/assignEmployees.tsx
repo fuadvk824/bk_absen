@@ -24,6 +24,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 
 export interface Employee {
@@ -156,24 +158,44 @@ export default function AssignEmployees({ shift, employees, offices, filters, cu
 
             <div className="space-y-4 p-5">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-xl font-semibold">
-                            Shift: {shift.name_shift}{' '}
-                            <span className="text-sm text-muted-foreground"> (Periode : {currentPeriod})</span>
-                        </h1>
+                    <div className="flex flex-col items-baseline gap-0 sm:flex-row sm:items-center sm:gap-2">
+                        <h1 className="text-lg font-semibold sm:text-xl">Shift: {shift.name_shift}</h1>
+
+                        <div className="flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground sm:text-sm">(Periode : {currentPeriod})</span>
+
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 cursor-pointer text-muted-foreground transition-colors hover:text-foreground" />
+                                    </TooltipTrigger>
+
+                                    <TooltipContent className="max-w-xs">
+                                        <p>
+                                            Menyimpan shift sekarang akan membuat jadwal kerja untuk periode
+                                            <strong> {currentPeriod}</strong>.
+                                        </p>
+                                        <p className="mt-2">
+                                            Jika dilakukan mulai tanggal <strong>20 keatas</strong>, jadwal akan dibuat untuk
+                                            periode berikutnya.
+                                        </p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                     </div>
 
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
 
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button className="cursor-pointer">
                                     <Save />
-                                    Simpan
+                                    <span className="hidden sm:block">Simpan</span>
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent size="sm">
@@ -196,6 +218,7 @@ export default function AssignEmployees({ shift, employees, offices, filters, cu
                         </AlertDialog>
                     </div>
                 </div>
+
                 <div className="grid grid-cols-1 gap-3 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <div className="space-y-1">
                         <Label className="text-[11px]">Cari Nama Karyawan</Label>

@@ -125,7 +125,10 @@ export function DataTable<TData>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className={`p-3 text-xs ${getStickyClass(cell.column, 'cell')}`}>
+                                        <TableCell
+                                            key={cell.id}
+                                            className={`p-3 text-xs ${getStickyClass(cell.column, 'cell')}`}
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -143,32 +146,55 @@ export function DataTable<TData>({
             </div>
 
             <div className="flex flex-col gap-4 text-xs md:flex-row md:items-center md:justify-between">
-                <div className="text-muted-foreground">
+                <div className="flex items-center justify-between text-muted-foreground">
                     {meta.total && (
                         <span>
                             Showing {data.length} of {meta.total} results
                         </span>
                     )}
+                    <div className="block sm:hidden">
+                        <Select value={String(perPage)} onValueChange={(value) => onPerPageChange?.(Number(value))}>
+                            <SelectTrigger className="w-28 text-xs">
+                                <SelectValue>
+                                    <span className="inline-flex items-center gap-1">
+                                        {perPage}
+                                        <span className="text-muted-foreground">rows</span>
+                                    </span>
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="text-xs" align='end'>
+                                {[5, 10, 25, 50, 100, 500].map((size) => (
+                                    <SelectItem key={size} value={String(size)} className="text-xs">
+                                        {size} rows
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                <div className="flex items-center">
-                    <Select value={String(perPage)} onValueChange={(value) => onPerPageChange?.(Number(value))}>
-                        <SelectTrigger className="w-28 text-xs">
-                            <SelectValue>
-                                <span className="inline-flex items-center gap-1">
-                                    {perPage}
-                                    <span className="text-muted-foreground">rows</span>
-                                </span>
-                            </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="text-xs">
-                            {[5, 10, 25, 50, 100, 500].map((size) => (
-                                <SelectItem key={size} value={String(size)} className="text-xs">
-                                    {size} rows
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <div className="block h-px w-full bg-gray-200 sm:hidden" />
+
+                <div className="flex items-center justify-center sm:justify-baseline">
+                    <div className="hidden sm:block">
+                        <Select value={String(perPage)} onValueChange={(value) => onPerPageChange?.(Number(value))}>
+                            <SelectTrigger className="w-28 text-xs">
+                                <SelectValue>
+                                    <span className="inline-flex items-center gap-1">
+                                        {perPage}
+                                        <span className="text-muted-foreground">rows</span>
+                                    </span>
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="text-xs">
+                                {[5, 10, 25, 50, 100, 500].map((size) => (
+                                    <SelectItem key={size} value={String(size)} className="text-xs">
+                                        {size} rows
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
 
                     <div className="text-xs">
                         <LaravelPagination meta={meta} />

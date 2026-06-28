@@ -16,13 +16,7 @@ import { useTableActions } from '@/lib/useTableAction';
 import { Label } from '@/components/ui/label';
 import { AlarmClockPlus, Cog, FileSpreadsheet, RefreshCw } from 'lucide-react';
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 import { columnOvertimeRates } from './column-overtime-rate';
 import Form from './form';
@@ -39,17 +33,11 @@ interface Props {
 }
 
 export default function Index({ overtimeRates, filters }: Props) {
-    const [columnVisibility, setColumnVisibility] =
-        useState<VisibilityState>({});
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const allColumns = [
-        'name',
-        'rate_per_hour',
-        'effective_from',
-        'is_active',
-    ];
+    const allColumns = ['name', 'rate_per_hour', 'effective_from', 'is_active'];
 
     const [localFilters, setLocalFilters] = useState({
         search: filters.search ?? '',
@@ -85,8 +73,7 @@ export default function Index({ overtimeRates, filters }: Props) {
 
     const [open, setOpen] = useState(false);
 
-    const [selectedOvertimeRate, setSelectedOvertimeRate] =
-        useState<OvertimeRate | null>(null);
+    const [selectedOvertimeRate, setSelectedOvertimeRate] = useState<OvertimeRate | null>(null);
 
     const openCreate = () => {
         setSelectedOvertimeRate(null);
@@ -110,64 +97,41 @@ export default function Index({ overtimeRates, filters }: Props) {
             <Head title="Bonus Lembur" />
 
             <div className="space-y-4 p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h1 className="text-xl font-semibold">
-                        Data Bonus Lembur
+                <div className="flex items-center justify-between">
+                    <h1 className="text-xl font-semibold ">
+                        <span className="hidden sm:inline">Data</span> Bonus Lembur
                     </h1>
 
                     <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={handleResetFilters}
-                            className="cursor-pointer"
-                        >
-                            <RefreshCw
-                                className={`h-4 w-4 ${
-                                    isRefreshing ? 'animate-spin' : ''
-                                }`}
-                            />
-                            Refresh
+                        <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
+                            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
 
                         <Button
                             variant="outline"
-                            onClick={() =>
-                                handleExport(columnVisibility)
-                            }
+                            onClick={() => handleExport(columnVisibility)}
                             className="cursor-pointer text-xs"
                         >
                             <FileSpreadsheet className="h-4 w-4" />
-                            Export
+                            <span className="hidden sm:block">Export</span>
                         </Button>
 
-                        <Button
-                            className="cursor-pointer text-xs"
-                            onClick={openCreate}
-                            disabled
-                        >
+                        <Button className="cursor-pointer text-xs" onClick={openCreate} disabled>
                             <AlarmClockPlus className="h-4 w-4" />
-                            Tambah
+                            <span className="hidden sm:block">Tambah</span>
                         </Button>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Nama Bonus Lembur
-                        </Label>
+                        <Label className="text-[11px]">Nama Bonus Lembur</Label>
 
                         <Input
                             placeholder="Cari nama lembur..."
                             value={localFilters.search}
-                            onChange={(e) =>
-                                handleFilterChange(
-                                    localFilters,
-                                    setLocalFilters,
-                                    'search',
-                                    e.target.value,
-                                )
-                            }
+                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
                             className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
@@ -176,11 +140,7 @@ export default function Index({ overtimeRates, filters }: Props) {
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogContent className="sm:max-w-lg">
                         <DialogHeader>
-                            <DialogTitle>
-                                {selectedOvertimeRate
-                                    ? 'Edit Bonus Lembur'
-                                    : 'Tambah Bonus Lembur'}
-                            </DialogTitle>
+                            <DialogTitle>{selectedOvertimeRate ? 'Edit Bonus Lembur' : 'Tambah Bonus Lembur'}</DialogTitle>
 
                             <DialogDescription>
                                 {selectedOvertimeRate
@@ -196,12 +156,9 @@ export default function Index({ overtimeRates, filters }: Props) {
                                     ? {
                                           id: selectedOvertimeRate.id,
                                           name: selectedOvertimeRate.name,
-                                          rate_per_hour:
-                                              selectedOvertimeRate.rate_per_hour,
-                                          effective_from:
-                                              selectedOvertimeRate.effective_from,
-                                          is_active:
-                                              selectedOvertimeRate.is_active,
+                                          rate_per_hour: selectedOvertimeRate.rate_per_hour,
+                                          effective_from: selectedOvertimeRate.effective_from,
+                                          is_active: selectedOvertimeRate.is_active,
                                       }
                                     : undefined
                             }
@@ -216,14 +173,7 @@ export default function Index({ overtimeRates, filters }: Props) {
                     columnVisibility={columnVisibility}
                     onColumnVisibilityChange={setColumnVisibility}
                     perPage={localFilters.perPage}
-                    onPerPageChange={(value) =>
-                        handleFilterChange(
-                            localFilters,
-                            setLocalFilters,
-                            'perPage',
-                            value,
-                        )
-                    }
+                    onPerPageChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'perPage', value)}
                 />
             </div>
         </AppLayout>

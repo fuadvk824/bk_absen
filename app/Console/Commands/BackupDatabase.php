@@ -8,7 +8,6 @@ use App\Services\GoogleDriveService;
 class BackupDatabase extends Command
 {
     protected $signature = 'db:backup';
-
     protected $description = 'Backup database dan upload ke Google Drive';
 
     public function handle()
@@ -22,11 +21,20 @@ class BackupDatabase extends Command
         $filename = 'backup_' . now()->format('Ymd_His') . '.sql';
         $path = $backupDir . DIRECTORY_SEPARATOR . $filename;
 
+        $mysqldump = 'C:\\laragon\\bin\\mysql\\mysql-8.0.30-winx64\\bin\\mysqldump.exe';
+
+        $password = env('DB_PASSWORD');
+
+        $passwordOption = $password !== ''
+            ? '-p"' . $password . '"'
+            : '';
+
         $command = sprintf(
-            'mysqldump -h%s -u%s -p"%s" %s > "%s"',
+            '"%s" -h%s -u%s %s %s > "%s"',
+            $mysqldump,
             env('DB_HOST'),
             env('DB_USERNAME'),
-            env('DB_PASSWORD'),
+            $passwordOption,
             env('DB_DATABASE'),
             $path
         );
@@ -41,15 +49,13 @@ class BackupDatabase extends Command
         try {
 
             $drive = new GoogleDriveService();
-
-            $drive->upload($path, $filename);
+            $drive->upload($path, $filename, 7, 'backup_');
 
             unlink($path);
 
             $this->info('Backup berhasil diupload ke Google Drive.');
 
             return Command::SUCCESS;
-
         } catch (\Exception $e) {
 
             $this->error($e->getMessage());

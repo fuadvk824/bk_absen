@@ -30,7 +30,7 @@ interface Props {
 
 export default function Index({ positions, filters }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const allColumns = ['position_code', 'name'];
 
     const [localFilters, setLocalFilters] = useState({
@@ -54,7 +54,7 @@ const [isRefreshing, setIsRefreshing] = useState(false);
 
         setLocalFilters(defaultFilters);
 
-        router.get(route('position.index'), {}, { replace: true,     onFinish: () => setIsRefreshing(false), });
+        router.get(route('position.index'), {}, { replace: true, onFinish: () => setIsRefreshing(false) });
     };
 
     const [open, setOpen] = useState(false);
@@ -76,23 +76,27 @@ const [isRefreshing, setIsRefreshing] = useState(false);
 
             <div className="space-y-4 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h1 className="text-xl font-semibold">Data Jabatan</h1>
+                    <h1 className="text-xl font-semibold">
+                        <span className="hidden sm:inline">Data</span> Jabatan
+                    </h1>
 
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
                         <Button
                             variant="outline"
                             onClick={() => handleExport(columnVisibility)}
                             className="cursor-pointer text-xs"
                         >
-                            <FileSpreadsheet className="h-4 w-4" />Export
+                            <FileSpreadsheet className="h-4 w-4" />
+                            <span className="hidden sm:block">Export</span>
                         </Button>
-                       
+
                         <Button className="cursor-pointer text-xs" onClick={openCreate}>
-                            <UserCog className="h-4 w-4"/>Tambah
+                            <UserCog className="h-4 w-4" />
+                            <span className="hidden sm:block">Tambah</span>
                         </Button>
                     </div>
                 </div>
