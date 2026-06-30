@@ -17,7 +17,6 @@ use App\Http\Controllers\Web\PositionController;
 use App\Http\Controllers\Web\SalaryController;
 use App\Http\Controllers\Web\ShiftController;
 use App\Http\Controllers\Web\WorkScheduleController;
-use App\Services\GoogleDriveService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -32,15 +31,15 @@ Route::get('/google/login', [GoogleDriveController::class, 'login']);
 Route::get('/google/callback', [GoogleDriveController::class, 'callback']);
 
 Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(function () {
-    Route::get('/upload-test', function () {
-        $service = new \App\Services\GoogleDriveService();
-        $service->upload(
-            storage_path('app/test.txt'),
-            'test.txt'
-        );
+    // Route::get('/upload-test', function () {
+    //     $service = new \App\Services\GoogleDriveService();
+    //     $service->upload(
+    //         storage_path('app/test.txt'),
+    //         'test.txt'
+    //     );
 
-        return 'Berhasil';
-    });
+    //     return 'Berhasil';
+    // });
 
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

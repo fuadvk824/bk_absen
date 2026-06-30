@@ -30,7 +30,10 @@ class User extends Authenticatable
         'tanggal_lahir',
         'alamat',
         'no_telepon',
+        'no_rek',
+        'pend_last',
         'image',
+        'key_status',
         'temporary_password',
     ];
 
@@ -80,6 +83,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActivityLog::class);
     }
-
-   
 }

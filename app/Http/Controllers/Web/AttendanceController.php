@@ -25,7 +25,7 @@ class AttendanceController extends Controller
         $attendances = Attendance::filter($request)
             ->with([
                 'employee:id,name,office_id,department_id',
-                'employee.office:id,name',
+                'employee.office:id,name,latitude,longitude,radius_meter',
                 'employee.department:id,name',
                 'employee.shift:id,name_shift',
             ])

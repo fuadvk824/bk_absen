@@ -19,6 +19,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import AttendancePhotoDialog from './attendance-photo-dialog';
 
 const handleToast = (page: any) => {
     const flash = page.props.flash as {
@@ -69,11 +70,22 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
         cell: ({ row }) => {
             const checkIn = row.getValue<string>('check_in') ?? '-';
             const tanggal = row.original.tanggal ?? '-';
+            const attendance = row.original;
 
             return (
-                <div className="flex flex-col text-sm">
-                    <span className="text-xs font-medium">{checkIn}</span>
-                    <span className="text-xs text-muted-foreground">{tanggal}</span>
+                <div className="flex flex-col gap-2 text-sm">
+                    <div className="flex flex-col">
+                        <span className="text-xs font-medium">{checkIn}</span>
+                        <span className="text-xs text-muted-foreground">{tanggal}</span>
+                    </div>
+                    <AttendancePhotoDialog
+                        title="Detail Check In"
+                        image={attendance.gambar_checkin}
+                        office={attendance.office}
+                        latitude={attendance.latitude_checkin}
+                        longitude={attendance.longitude_checkin}
+                        distance={attendance.distance_checkin}
+                    />
                 </div>
             );
         },
@@ -86,7 +98,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
             const image = row.getValue<string>('gambar_checkin');
             if (!image) return '-';
 
-            return <img src={image} alt="Checkin" className="h-10 w-10 rounded border object-cover" />;
+            return <img src={image} alt="Checkin" className="h-16 w-16 rounded border object-cover" />;
         },
     },
 
@@ -210,7 +222,29 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
     {
         accessorKey: 'check_out',
         header: 'Check-out',
-        cell: ({ row }) => row.getValue('check_out') ?? '-',
+        cell: ({ row }) => {
+            const checkOut = row.getValue<string>('check_out') ?? '-';
+            const tanggal = row.original.tanggal ?? '-';
+            const attendance = row.original;
+
+            return (
+                <div className="flex flex-col gap-2 text-sm">
+                    <div className="flex flex-col">
+                        <span className="text-xs font-medium">{checkOut}</span>
+                        <span className="text-xs text-muted-foreground">{tanggal}</span>
+                    </div>
+
+                    <AttendancePhotoDialog
+                        title="Detail Check Out"
+                        image={attendance.gambar_checkout}
+                        office={attendance.office}
+                        latitude={attendance.latitude_checkout}
+                        longitude={attendance.longitude_checkout}
+                        distance={attendance.distance_checkout}
+                    />
+                </div>
+            );
+        },
     },
 
     {
@@ -220,7 +254,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
             const image = row.getValue<string>('gambar_checkout');
             if (!image) return '-';
 
-            return <img src={image} alt="Checkout" className="h-10 w-10 rounded border object-cover" />;
+            return <img src={image} alt="Checkout" className="h-16 w-16 rounded border object-cover" />;
         },
     },
 
@@ -240,7 +274,6 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
             );
         },
     },
-
     {
         accessorKey: 'total_waktu',
         header: 'Total Waktu',

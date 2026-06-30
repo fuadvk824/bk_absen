@@ -15,7 +15,7 @@ abstract class BaseExport implements FromCollection, WithHeadings, WithMapping, 
     protected array $columns;
     protected $data;
     protected int $rowNumber = 0;
-    protected string $title = 'LAPORAN DATA';
+    protected string $title = 'Rekap DATA';
 
     protected array $availableColumns = [];
 
@@ -109,7 +109,8 @@ abstract class BaseExport implements FromCollection, WithHeadings, WithMapping, 
                     ],
                 ]);
 
-                $sheet->getStyle("A3:{$lastColumn}3")->applyFromArray([
+                $sheet->mergeCells("A3:{$lastColumn}3");
+                $sheet->getStyle("A4:{$lastColumn}4")->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -121,11 +122,7 @@ abstract class BaseExport implements FromCollection, WithHeadings, WithMapping, 
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                     ],
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                        ],
-                    ],
+
                 ]);
             },
         ];

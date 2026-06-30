@@ -20,4 +20,12 @@ export interface AttendanceList {
     late_reason: string;
     statusAprv: 'pending' | 'approved' | 'rejected' | 'onTime';
     early_reason?: string | null;
+
+    latitude_checkin: number | null;
+    longitude_checkin: number | null;
+    distance_checkin: number | null;
+    latitude_checkout: number | null;
+    longitude_checkout: number | null;
+    distance_checkout: number | null;
+    office: OfficeLocation;
 }

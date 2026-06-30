@@ -97,7 +97,7 @@ class Employee extends Model
     {
         return $query
             ->with([
-                'user:id,name,no_telepon,tanggal_lahir,alamat,email',
+                'user',
                 'position:id,name',
                 'department:id,name',
                 'office:id,name',

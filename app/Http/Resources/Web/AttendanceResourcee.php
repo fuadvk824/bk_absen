@@ -39,6 +39,23 @@ class AttendanceResourcee extends JsonResource
             'late_reason' => $this->late_reason,
             'late_proof' => $this->late_proof ? asset('storage/' . $this->late_proof) : null,
             'early_reason' => $this->early_reason,
+
+
+            'latitude_checkin' => $this->latitude_checkin,
+            'longitude_checkin' => $this->longitude_checkin,
+            'distance_checkin' => $this->distance_checkin,
+
+            'latitude_checkout' => $this->latitude_checkout,
+            'longitude_checkout' => $this->longitude_checkout,
+            'distance_checkout' => $this->distance_checkout,
+
+            'office' => [
+                'id' => $this->employee?->office?->id,
+                'name' => $this->employee?->office?->name,
+                'latitude' => $this->employee?->office?->latitude,
+                'longitude' => $this->employee?->office?->longitude,
+                'radius_meter' => $this->employee?->office?->radius_meter,
+            ],
         ];
     }
 }

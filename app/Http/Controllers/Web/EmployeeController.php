@@ -228,7 +228,6 @@ class EmployeeController extends Controller
         return back()->with('success', 'Status karyawan berhasil diperbarui.');
     }
 
-
     public function destroy(Employee $employee)
     {
         $user = $employee->user;
@@ -243,7 +242,11 @@ class EmployeeController extends Controller
 
     public function export(Request $request)
     {
-        $columns = $request->input('columns', []);
-        return Excel::download(new EmployeesExport($request, $columns), 'employee.xlsx');
+        $date = now()->format('d-m-Y');
+
+        return Excel::download(
+            new EmployeesExport($request),
+            "Data Karyawan {$date}.xlsx"
+        );
     }
 }

@@ -31,5 +31,5 @@ Schedule::command('db:backup')->everyMinute();
 // Schedule::command('db:backup')->hourly();
 
 // // Setiap hari jam 01:00
-// Schedule::command('db:backup')->dailyAt('01:00');
+Schedule::command('db:backup')->dailyAt('11:45');
 
