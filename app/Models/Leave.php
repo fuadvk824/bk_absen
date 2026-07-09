@@ -25,6 +25,11 @@ class Leave extends Model
         'status',
     ];
 
+    protected $casts = [
+        'start_date' => 'date:d-m-Y',
+        'end_date' => 'date:d-m-Y',
+    ];
+
     /**
      * Relasi ke employee
      */

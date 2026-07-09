@@ -23,17 +23,6 @@ class GoogleDriveService
 
         $this->drive = new Drive($client);
     }
-    // public function __construct()
-    // {
-    //     $this->client = new Client();
-
-    //     $this->client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
-    //     $this->client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
-
-    //     $this->client->refreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
-
-    //     $this->drive = new Drive($this->client);
-    // }
 
     public function upload($localFile, $filename, $keep, $prefix)
     {
@@ -60,55 +49,6 @@ class GoogleDriveService
 
         return $result;
     }
-    // public function upload($localFile, $filename, $keep, $prefix)
-    // {
-    //     $file = new DriveFile();
-
-    //     $file->setName($filename);
-
-    //     $file->setParents([
-    //         env('GOOGLE_DRIVE_FOLDER_ID')
-    //     ]);
-
-    //     $fileSize = filesize($localFile);
-
-    //     $this->client->setDefer(true);
-
-    //     $request = $this->drive->files->create(
-    //         $file,
-    //         [
-    //             'uploadType' => 'resumable'
-    //         ]
-    //     );
-
-    //     $chunkSize = 5 * 1024 * 1024; // 5 MB
-
-    //     $media = new MediaFileUpload(
-    //         $this->client,
-    //         $request,
-    //         'application/octet-stream',
-    //         null,
-    //         true,
-    //         $chunkSize
-    //     );
-
-    //     $media->setFileSize($fileSize);
-
-    //     $handle = fopen($localFile, 'rb');
-
-    //     while (!$media->isDone() && !feof($handle)) {
-
-    //         $chunk = fread($handle, $chunkSize);
-
-    //         $media->nextChunk($chunk);
-    //     }
-
-    //     fclose($handle);
-
-    //     $this->client->setDefer(false);
-
-    //     $this->deleteOldBackups($prefix, $keep);
-    // }
 
     public function deleteOldBackups($prefix, $keep)
     {

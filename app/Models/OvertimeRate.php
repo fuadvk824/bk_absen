@@ -14,7 +14,7 @@ class OvertimeRate extends Model
     ];
 
     protected $casts = [
-        'effective_from' => 'date',
+        'effective_from' => 'date:d-m-Y',
         'rate_per_hour' => 'decimal:2',
         'is_active' => 'boolean',
     ];

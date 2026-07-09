@@ -14,7 +14,7 @@ class Salary extends Model
     ];
 
     protected $casts = [
-        'effective_from' => 'date',
+        'effective_from' => 'date:d-m-Y',
     ];
 
     public function employee()

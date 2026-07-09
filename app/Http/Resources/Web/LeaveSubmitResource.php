@@ -22,8 +22,8 @@ class LeaveSubmitResource extends JsonResource
             'leave_category' => $this->leaveCategory?->leave_name,
 
             'submit' => $this->submit,
-            'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
+            'start_date' => $this->start_date->format('d-m-Y'),
+            'end_date' => $this->end_date->format('d-m-Y'),
             'total_days' => $this->total_days,
 
             'file' => $this->file,

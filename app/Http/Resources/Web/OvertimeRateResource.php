@@ -19,7 +19,7 @@ class OvertimeRateResource extends JsonResource
             'id'             => $this->id,
             'name'           => $this->name,
             'rate_per_hour'  => $this->rate_per_hour,
-            'effective_from' => Carbon::parse($this->effective_from)->format('Y-m-d'),
+            'effective_from' => Carbon::parse($this->effective_from)->format('d-m-Y'),
             'is_active'      => $this->is_active,
         ];
     }

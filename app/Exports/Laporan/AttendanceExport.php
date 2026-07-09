@@ -150,10 +150,19 @@ class AttendanceExport implements FromArray, WithEvents
 
             $row[] = ['REKAP LAPORAN ABSENSI'];
 
-            $periode =
-                ($this->request->start_date ?? '-') .
-                ' s/d ' .
-                ($this->request->end_date ?? '-');
+            // $periode =
+            //     ($this->request->start_date ?? '-') .
+            //     ' s/d ' .
+            //     ($this->request->end_date ?? '-');
+             $startDate = $this->request->start_date
+                ? Carbon::parse($this->request->start_date)->format('d-m-Y')
+                : '-';
+
+            $endDate = $this->request->end_date
+                ? Carbon::parse($this->request->end_date)->format('d-m-Y')
+                : '-';
+
+            $periode = "{$startDate} s/d {$endDate}";
 
             $row[] = ["Periode : {$periode}"];
             $row[] = [''];

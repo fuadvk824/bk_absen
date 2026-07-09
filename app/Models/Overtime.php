@@ -14,7 +14,7 @@ class Overtime extends Model
     protected $fillable = ['employee_id', 'overtime_rate_id', 'date', 'time_from', 'time_to', 'reason', 'status', 'is_paid'];
 
     protected $casts = [
-        'date' => 'date:Y-m-d',
+        'date' => 'date:d-m-Y',
         'time_from' => 'datetime:H:i',
         'time_to' => 'datetime:H:i',
         'rate_per_hour' => 'decimal:2',

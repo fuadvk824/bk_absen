@@ -31,15 +31,6 @@ Route::get('/google/login', [GoogleDriveController::class, 'login']);
 Route::get('/google/callback', [GoogleDriveController::class, 'callback']);
 
 Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(function () {
-    // Route::get('/upload-test', function () {
-    //     $service = new \App\Services\GoogleDriveService();
-    //     $service->upload(
-    //         storage_path('app/test.txt'),
-    //         'test.txt'
-    //     );
-
-    //     return 'Berhasil';
-    // });
 
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

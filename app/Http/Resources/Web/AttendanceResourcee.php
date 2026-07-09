@@ -19,7 +19,7 @@ class AttendanceResourcee extends JsonResource
         return [
             'id' => $this->id,
             'nama_karyawan' => $this->employee->name,
-            'tanggal' => $this->tanggal->format('Y-m-d'),
+            'tanggal' => $this->tanggal->format('d-m-Y'),
 
             'check_in' => $this->check_in,
             'gambar_checkin' => $this->gambar_checkin ? asset('storage/' . $this->gambar_checkin) : null,

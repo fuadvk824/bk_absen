@@ -17,14 +17,14 @@ class OvertimeResource extends JsonResource
         return [
             'id' => $this->id,
             'employee_name' => $this->employee->name,
-            'date' => $this->date?->format('Y-m-d'),
+            'date' => $this->date?->format('d-m-Y'),
 
             'time_from' => $this->time_from->format('H:i'),
             'time_to' => $this->time_to->format('H:i'),
 
             'reason' => $this->reason,
             'status' => $this->status,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at?->format('d-m-Y H:i:s'),
         ];
     }
 }

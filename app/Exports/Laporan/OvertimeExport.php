@@ -4,6 +4,7 @@ namespace App\Exports\Laporan;
 
 use App\Http\Resources\Web\OvertimeExportResource;
 use App\Models\Overtime;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -72,10 +73,19 @@ class OvertimeExport implements FromArray, WithEvents
 
             $row[] = ['REKAP LAPORAN LEMBUR'];
 
-            $periode =
-                ($this->request->start_date ?? '-') .
-                ' s/d ' .
-                ($this->request->end_date ?? '-');
+            // $periode =
+            //     ($this->request->start_date ?? '-') .
+            //     ' s/d ' .
+            //     ($this->request->end_date ?? '-');
+            $startDate = $this->request->start_date
+                ? Carbon::parse($this->request->start_date)->format('d-m-Y')
+                : '-';
+
+            $endDate = $this->request->end_date
+                ? Carbon::parse($this->request->end_date)->format('d-m-Y')
+                : '-';
+
+            $periode = "{$startDate} s/d {$endDate}";
 
             $row[] = ["Periode : {$periode}"];
             $row[] = [""];
@@ -349,4 +359,3 @@ class OvertimeExport implements FromArray, WithEvents
         ];
     }
 }
-  
