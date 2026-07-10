@@ -42,6 +42,16 @@ const updateStatus = (id: number, status: string) => {
     );
 };
 
+const formatDate = (date: string) => {
+    const d = new Date(date);
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+
+    return `${day}-${month}-${year}`;
+};
+
 export const columnLeave: ColumnDef<LeaveSubmitList>[] = [
     {
         id: 'select',
@@ -69,10 +79,12 @@ export const columnLeave: ColumnDef<LeaveSubmitList>[] = [
     {
         accessorKey: 'start_date',
         header: 'Mulai',
+        cell: ({ row }) => formatDate(row.getValue('start_date')),
     },
     {
         accessorKey: 'end_date',
         header: 'Selesai',
+        cell: ({ row }) => formatDate(row.getValue('end_date')),
     },
     {
         accessorKey: 'total_days',

@@ -27,14 +27,6 @@ class AssignLeaveController extends Controller
                 $q->where('name', 'like', "%{$request->name}%");
             })
 
-            // ->when($request->masa_kerja, function ($q) use ($request) {
-            //     $years = (int) $request->masa_kerja;
-            //     $q->whereDate(
-            //         'tanggal_awal_kerja',
-            //         '<=',
-            //         Carbon::now()->subYears($years)
-            //     );
-            // })
             ->when($request->masa_kerja, function ($q) use ($request) {
                 $months = (int) $request->masa_kerja;
 
