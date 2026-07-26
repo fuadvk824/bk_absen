@@ -68,7 +68,6 @@ class OvertimeExport implements FromArray, WithEvents
             ->get()
             ->groupBy('employee_id');
 
-
         foreach ($groups as $employeeOvertimes) {
 
             $row[] = ['REKAP LAPORAN LEMBUR'];

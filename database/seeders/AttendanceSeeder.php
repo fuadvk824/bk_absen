@@ -4,146 +4,68 @@ namespace Database\Seeders;
 
 use App\Models\Attendance;
 use App\Models\Employee;
-use App\Models\ShiftDetail;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Carbon;
 
 class AttendanceSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::transaction(function () {
-            $rows = Excel::toCollection(null, storage_path('app/AttendanceSeed.xlsx'))->first();
+        $employees = Employee::all();
 
-            $rows = $rows->skip(1);
+        if ($employees->isEmpty()) {
+            $this->command->warn('Data employee belum tersedia.');
+            return;
+        }
 
-            foreach ($rows as $row) {
-                $employeeName = trim($row[0] ?? '');
-                $tanggal = trim($row[1] ?? '');
-                $checkInRaw = trim($row[2] ?? '');
-                $checkOutRaw = trim($row[3] ?? '');
-                $totalWaktuRaw = trim($row[4] ?? '');
-                $statusCheckin = trim($row[5] ?? '');
-                $statusCheckout = trim($row[6] ?? '');
+        $today = Carbon::today();
 
-                if (!$employeeName || !$tanggal) {
-                    continue;
-                }
+        foreach ($employees as $employee) {
+            
 
-                $employee = Employee::with('shift')->where('name', $employeeName)->first();
+            Attendance::create([
+                'employee_id' => $employee->id,
 
-                if (!$employee) {
-                    $this->command->warn("Employee tidak ditemukan: {$employeeName}");
-                    continue;
-                }
+                'gambar_checkin' => null,
+                'gambar_checkout' => null,
 
-                if (!$employee->shift) {
-                    $this->command->warn("Shift tidak ditemukan untuk: {$employeeName}");
-                    continue;
-                }
+                'tanggal' => $today->toDateString(),
+                'name_shift' => 'Shift Pagi',
 
-                $dayName = strtolower(Carbon::parse($tanggal)->locale('id')->dayName);
-                $shiftDetail = ShiftDetail::where('shift_id', $employee->shift_id)
-                    ->where('day_of_week', $dayName)
-                    ->where('is_active', true)
-                    ->first();
+                'check_in' => '08:00:00',
+                'check_out' => '17:00:00',
 
-                if (!$shiftDetail) {
-                    $this->command->warn("Shift detail tidak ditemukan: {$employeeName} ({$dayName})");
-                    continue;
-                }
+                'checkin_time' => '08:00:00',
+                'checkout_time' => '17:00:00',
 
+                'toleransi_late' => 15,
+                'late_minutes' => 0,
+                'total_waktu' => 540,
 
+                'status_checkin' => 'checked_in',
+                'status_checkout' => 'checked_out',
 
-                $toleransi = $employee->shift->toleransi_late ?? 0;
+                'status' => 'ontime',
 
-                $checkIn = null;
+                'late_reason' => null,
+                'late_proof' => null,
+                'early_reason' => null,
 
-                if (!empty($checkInRaw)) {
-                    $checkIn = Carbon::parse($checkInRaw)->format('H:i:s');
-                }
+                'statusAprv' => 'onTime',
 
-                $checkOut = null;
+                'latitude_checkin' => -7.250445,
+                'longitude_checkin' => 112.768845,
+                'distance_checkin' => 10.50,
 
-                if (!empty($checkOutRaw)) {
-                    $checkOut = Carbon::parse($checkOutRaw)->format('H:i:s');
-                }
+                'latitude_checkout' => -7.250445,
+                'longitude_checkout' => 112.768845,
+                'distance_checkout' => 12.30,
 
-                $totalWaktu = null;
+                'device' => 'Seeder',
 
-                if (!empty($totalWaktuRaw)) {
-                    $parts = explode(':', $totalWaktuRaw);
-
-                    $jam = (int) ($parts[0] ?? 0);
-                    $menit = (int) ($parts[1] ?? 0);
-
-                    $totalWaktu = $jam * 60 + $menit;
-                }
-
-                $checkinTime = '08:00:00';
-                $checkoutTime = '17:00:00';
-
-                $lateMinutes = 0;
-                $status = 'ontime';
-
-                if ($checkIn) {
-                    $checkInCarbon = Carbon::createFromFormat('H:i:s', $checkIn);
-                    $shiftCarbon = Carbon::createFromFormat('H:i:s', $checkinTime);
-
-                    if ($checkInCarbon->gt($shiftCarbon)) {
-                        $lateMinutes = $shiftCarbon->diffInMinutes($checkInCarbon);
-
-                        $status = $lateMinutes > 3 ? 'late' : 'ontime';
-                    }
-                }
-                $status = $lateMinutes > 0 ? 'late' : 'ontime';
-                $statusAprv = $lateMinutes > $toleransi ? 'pending' : 'onTime';
-
-                Attendance::updateOrCreate(
-                    [
-                        'employee_id' => $employee->id,
-                        'tanggal' => $tanggal,
-                    ],
-                    [
-                        'name_shift' => 'Normal',
-
-                        'check_in' => $checkIn,
-                        'check_out' => $checkOut,
-
-                        'checkin_time' => $checkinTime,
-                        'checkout_time' => $checkoutTime,
-
-                        'toleransi_late' => $toleransi,
-                        'late_minutes' => $lateMinutes,
-                        'total_waktu' => $totalWaktu,
-
-                        'status_checkin' => $statusCheckin ?: null,
-                        'status_checkout' => $statusCheckout ?: null,
-
-                        'status' => $status,
-
-                        'gambar_checkin' => null,
-                        'gambar_checkout' => null,
-
-                        'late_reason' => null,
-                        'late_proof' => null,
-                        'statusAprv' => $statusAprv,
-                        'early_reason' => null,
-
-                        'latitude_checkin' => null,
-                        'longitude_checkin' => null,
-                        'distance_checkin' => null,
-
-                        'latitude_checkout' => null,
-                        'longitude_checkout' => null,
-                        'distance_checkout' => null,
-
-                        'device' => null,
-                    ],
-                );
-            }
-        });
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

@@ -93,7 +93,6 @@ class HomeController extends Controller
                 $limitLate = $checkinTime->copy()->addMinutes($toleransi);
                 $limitLate = $limitLate->format('H:i:s');
             }
-            // $hasShift = !is_null($shiftDetail);
             $hasShift = !is_null($scheduleDay);
         }
         $is_off = ($scheduleDay?->is_off ?? false) || !is_null($leave);
@@ -104,7 +103,6 @@ class HomeController extends Controller
                 'check_in' => null,
                 'check_out' => null,
                 'total_waktu' => null,
-                // 'is_off' => $scheduleDay?->is_off ?? false,
                 'is_off' => $is_off,
                 'has_shift' => $hasShift,
                 'limit_late' => $limitLate,
@@ -137,7 +135,6 @@ class HomeController extends Controller
             'check_out' => $attendance->check_out ? substr($attendance->check_out, 0, 5) : null,
             'total_waktu' => $totalWaktu ?? null,
 
-            // 'is_off' => $scheduleDay?->is_off ?? false,
             'is_off' => $is_off,
             'has_shift' => $hasShift,
         ]);
@@ -156,13 +153,6 @@ class HomeController extends Controller
         $employeeId = $request->user()->employees->id;
         $employeeCode = $request->user()->employees->employee_code;
 
-
-        // $todayDate = now()->toDateString();
-        // $employee = Employee::with(['shift', 'office'])
-        //     ->findOrFail($employeeId);
-        // $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
-        // $checkInTime = Carbon::now($timezone);
-        //// $checkInTime = now();
         $employee = Employee::with(['shift', 'office'])
             ->findOrFail($employeeId);
 
@@ -230,7 +220,6 @@ class HomeController extends Controller
                 return response()->json(['message' => 'Shift belum diatur'], 400);
             }
 
-            // $todayDay = strtolower(Carbon::now()->locale('id')->dayName);
             $todayDay = strtolower(
                 Carbon::now($timezone)
                     ->locale('id')
@@ -243,7 +232,6 @@ class HomeController extends Controller
                 return response()->json(['message' => 'Shift hari ini tidak ditemukan'], 400);
             }
 
-            // $shiftCheckout = Carbon::parse($shiftDetail->checkout_time);
             $shiftCheckout = Carbon::today($timezone)
                 ->setTimeFromTimeString($shiftDetail->checkout_time);
             if ($checkInTime->gt($shiftCheckout)) {
@@ -257,7 +245,6 @@ class HomeController extends Controller
                 $imagePath = $imageService->upload($request->file('gambar_checkin'), 'att', $employeeCode, 'attendance');
             }
 
-            // $shiftCheckin = Carbon::parse($shiftDetail->checkin_time);
             $shiftCheckin = Carbon::today($timezone)
                 ->setTimeFromTimeString($shiftDetail->checkin_time);
             $lateMinutes = 0;
@@ -338,7 +325,6 @@ class HomeController extends Controller
         $employeeId = $employee->id;
         $employeeCode = $employee->employee_code;
 
-        // $today = now()->toDateString();
         $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
         $today = Carbon::now($timezone)->toDateString();
 
@@ -363,7 +349,6 @@ class HomeController extends Controller
         }
 
         return DB::transaction(function () use ($request, $imageService, $attendance, $employeeCode, $employee, $timezone) {
-            // $checkOutTime = now();
             $checkOutTime = Carbon::now($timezone);
 
             $imagePath = null;
@@ -372,12 +357,9 @@ class HomeController extends Controller
                 $imagePath = $imageService->upload($request->file('gambar_checkout'), 'att', $employeeCode, 'attendance');
             }
 
-            // $checkIn = Carbon::parse($attendance->check_in);
-            // $totalWaktu = $checkIn->diffInMinutes($checkOutTime);
             $checkIn = Carbon::today($timezone)->setTimeFromTimeString($attendance->check_in);
             $totalWaktu = $checkIn->diffInMinutes($checkOutTime);
 
-            // $hari = strtolower(now()->locale('id')->dayName);
             $hari = strtolower(
                 Carbon::now($timezone)
                     ->locale('id')
@@ -394,17 +376,14 @@ class HomeController extends Controller
 
             $earlyReason = null;
             if ($shiftDetail && $shiftDetail->checkout_time) {
-                // $shiftCheckout = Carbon::parse($shiftDetail->checkout_time);
                 $shiftCheckout = Carbon::today($timezone)
                     ->setTimeFromTimeString($shiftDetail->checkout_time);
 
                 if ($checkOutTime->lt($shiftCheckout)) {
-                    if (!$request->filled('early_reason')) {
-                        return response()->json([
-                            'message' => 'Alasan pulang cepat wajib diisi'
-                        ], 422);
-                    }
-                    $earlyReason = $request->early_reason;
+                    $earlyReason = $request->filled('early_reason')
+                        ? $request->early_reason
+                        : 'Default sistem pulang cepat';
+
                     $finalStatus = 'Lebih Cepat - ' . $rangeStatus;
                 } else {
                     $finalStatus = 'Tepat Waktu - ' . $rangeStatus;

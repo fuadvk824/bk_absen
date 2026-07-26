@@ -21,6 +21,7 @@ class Shift extends Model
         return $this->hasMany(Employee::class);
     }
 
+
     public function shiftDetails()
     {
         return $this->hasMany(ShiftDetail::class);

@@ -107,7 +107,7 @@ class WorkScheduleController extends Controller
         // $currentEnd = $currentStart->copy()->addMonth()->day(25);
 
         // if ($startPeriod->ne($currentStart) || $endPeriod->ne($currentEnd)) 
-        if ($now->lt($startPeriod) || $now->gt($endPeriod)) {
+        if ( $now->gt($endPeriod)) {
             return redirect()->back()->with('error', 'Tidak bisa mengubah periode yang sudah lewat.');
         }
 

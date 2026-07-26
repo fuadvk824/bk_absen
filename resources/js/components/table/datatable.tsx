@@ -61,7 +61,9 @@ export function DataTable<TData>({
         if (!sticky) return '';
 
         if (sticky === 'left') {
-            return type === 'header' ? 'sticky left-0 z-40 bg-muted' : 'sticky left-0 z-30 bg-white';
+            return type === 'header'
+                ? 'sticky left-0 z-40 bg-muted'
+                : 'sticky left-0 z-30 bg-white group-hover:bg-muted group-has-[[data-state=open]]:bg-muted';
         }
 
         return '';
@@ -123,11 +125,11 @@ export function DataTable<TData>({
                     <TableBody>
                         {table.getRowModel().rows.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id}>
+                                <TableRow key={row.id} className="group transition-colors duration-150 hover:bg-muted has-[[data-state=open]]:bg-muted">
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
-                                            className={`p-3 text-xs ${getStickyClass(cell.column, 'cell')}`}
+                                            className={`p-3 text-xs transition-colors duration-150 group-hover:bg-muted  ${getStickyClass(cell.column, 'cell')} `}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
@@ -162,7 +164,7 @@ export function DataTable<TData>({
                                     </span>
                                 </SelectValue>
                             </SelectTrigger>
-                            <SelectContent className="text-xs" align='end'>
+                            <SelectContent className="text-xs" align="end">
                                 {[5, 10, 25, 50, 100, 500].map((size) => (
                                     <SelectItem key={size} value={String(size)} className="text-xs">
                                         {size} rows

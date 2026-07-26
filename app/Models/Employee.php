@@ -80,7 +80,7 @@ class Employee extends Model
     {
         $today = now();
 
-        if ($today->day >= 26) {
+        if ($today->day >= 21) {
             $startDate = Carbon::create($today->year, $today->month, 26);
         } else {
             $startDate = Carbon::create($today->year, $today->month, 26)->subMonth();
