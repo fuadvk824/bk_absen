@@ -78,21 +78,33 @@ class OvertimeController extends Controller
 
         $employeeId = $employee->id;
 
-        $date = Carbon::parse($request->date);
+        // $date = Carbon::parse($request->date);
+        $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
+        $date = Carbon::parse($request->date, $timezone);
 
-        //////////////////////////////////////////////////////////
-        // if ($date->lt($now->copy()->startOfDay())) {
-        //     return response()->json([
-        //         'message' => 'Tanggal pengajuan sudah lewat',
-        //     ], 422);
-        // }
-        $timeFromDateTime = Carbon::parse($date->toDateString() . ' ' . $request->time_from);
-        $timeToDateTime   = Carbon::parse($date->toDateString() . ' ' . $request->time_to);
 
-        ///////////////////////////////////////////////
+        // $timeFromDateTime = Carbon::parse($date->toDateString() . ' ' . $request->time_from);
+        // $timeToDateTime   = Carbon::parse($date->toDateString() . ' ' . $request->time_to);
 
+        $timeFromDateTime = Carbon::parse(
+            $date->toDateString() . ' ' . $request->time_from,
+            $timezone
+        );
+        $timeToDateTime = Carbon::parse(
+            $date->toDateString() . ' ' . $request->time_to,
+            $timezone
+        );
+
+
+        // $exists = Overtime::where('employee_id', $employeeId)
+        //     ->where('date', $request->date)
+        //     ->where(function ($q) use ($request) {
+        //         $q->where('time_from', '<', $request->time_to)
+        //             ->where('time_to', '>', $request->time_from);
+        //     })
+        //     ->exists();
         $exists = Overtime::where('employee_id', $employeeId)
-            ->where('date', $request->date)
+            ->where('date', $date->toDateString())
             ->where(function ($q) use ($request) {
                 $q->where('time_from', '<', $request->time_to)
                     ->where('time_to', '>', $request->time_from);
@@ -131,16 +143,22 @@ class OvertimeController extends Controller
             );
         }
 
-        $checkinDateTime = Carbon::parse($date->toDateString() . ' ' . $shiftDetail->checkin_time);
-        $checkoutDateTime = Carbon::parse($date->toDateString() . ' ' . $shiftDetail->checkout_time);
+        // $checkinDateTime = Carbon::parse($date->toDateString() . ' ' . $shiftDetail->checkin_time);
+        // $checkoutDateTime = Carbon::parse($date->toDateString() . ' ' . $shiftDetail->checkout_time);
+
+        $checkinDateTime = Carbon::parse(
+            $date->toDateString() . ' ' . $shiftDetail->checkin_time,
+            $timezone
+        );
+        $checkoutDateTime = Carbon::parse(
+            $date->toDateString() . ' ' . $shiftDetail->checkout_time,
+            $timezone
+        );
 
         // handle shift lintas hari (contoh: 22:00 - 06:00)
         if ($checkoutDateTime->lte($checkinDateTime)) {
             $checkoutDateTime->addDay();
         }
-
-        // $timeFromDateTime = Carbon::parse($date->toDateString() . ' ' . $request->time_from);
-        // $timeToDateTime = Carbon::parse($date->toDateString() . ' ' . $request->time_to);
 
         $isInsideWorkTime =
             $timeFromDateTime->lt($checkoutDateTime) &&
@@ -179,7 +197,7 @@ class OvertimeController extends Controller
         $overtime = Overtime::create([
             'employee_id' => $employeeId,
             'overtime_rate_id' => $overtimeRateId,
-            'date' => $request->date,
+            'date' => $date->toDateString(),
             'time_from' => $request->time_from,
             'time_to' => $request->time_to,
             'reason' => $request->reason,
@@ -195,5 +213,4 @@ class OvertimeController extends Controller
             201,
         );
     }
-    
 }
