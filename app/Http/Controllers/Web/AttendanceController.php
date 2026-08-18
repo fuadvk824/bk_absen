@@ -15,10 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     return Inertia::render('coba/index');
-    // }
+
     public function index(Request $request)
     {
         $perPage = $request->get('perPage', 10);
@@ -67,6 +64,34 @@ class AttendanceController extends Controller
         ]);
 
         return back()->with('success', 'Status approval berhasil diperbarui');
+    }
+
+    public function update(Request $request, Attendance $attendance)
+    {
+        $validated = $request->validate([
+            'check_in' => ['nullable', 'date_format:H:i'],
+            'check_out' => ['nullable', 'date_format:H:i'],
+        ]);
+
+        $attendance->update([
+            'check_in' => $validated['check_in'],
+            'check_out' => $validated['check_out'],
+        ]);
+
+
+        if ($attendance->check_in && $attendance->check_out) {
+
+            $start = strtotime($attendance->check_in);
+            $end   = strtotime($attendance->check_out);
+
+            $attendance->update([
+                'total_waktu' => ($end - $start) / 60
+            ]);
+        }
+
+        $attendance->refresh();
+
+        return back()->with('success', 'Attendance berhasil diperbarui');
     }
 
     public function export(Request $request)

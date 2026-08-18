@@ -20,6 +20,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import AttendancePhotoDialog from './attendance-photo-dialog';
+import EditAttendanceDialog from './edit-attendance-dialog';
 
 const handleToast = (page: any) => {
     const flash = page.props.flash as {
@@ -108,10 +109,45 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
         cell: ({ row }) => {
             const attendance = row.original;
             const status = attendance.status_checkin ?? '-';
+            const isTepatWaktu = status.includes('Tepat Waktu');
+            const isTerlambatDenganToleransi = status.includes('Terlambat Dengan Toleransi');
+            const isTerlambatTanpaToleransi = status.includes('Terlambat Tanpa Toleransi');
+
+            const isDalamJangkauan = status.includes('Dalam Jangkauan');
+            const isLuarJangkauan = status.includes('Luar Jangkauan');
+
+            const waktuClass = isTepatWaktu
+                ? 'bg-green-100 text-green-700'
+                : isTerlambatDenganToleransi
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : isTerlambatTanpaToleransi
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-gray-100 text-gray-700';
+
+            const jangkauanClass = isDalamJangkauan
+                ? 'bg-green-100 text-green-700'
+                : isLuarJangkauan
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-gray-100 text-gray-700';
 
             return (
                 <div className="flex flex-col gap-2">
-                    <span className="text-xs">{status}</span>
+                    <div className="flex gap-1 items-center">
+                        <span className={`w-fit rounded-md px-2 py-1 text-xs font-medium ${waktuClass}`}>
+                            {isTepatWaktu
+                                ? 'Tepat Waktu'
+                                : isTerlambatDenganToleransi
+                                  ? 'Terlambat Dengan Toleransi'
+                                  : isTerlambatTanpaToleransi
+                                    ? 'Terlambat Tanpa Toleransi'
+                                    : '-'}
+                        </span>
+                        <span>-</span>
+
+                        <span className={`w-fit rounded-md px-2 py-1 text-xs font-medium ${jangkauanClass}`}>
+                            {isDalamJangkauan ? 'Dalam Jangkauan' : isLuarJangkauan ? 'Luar Jangkauan' : '-'}
+                        </span>
+                    </div>
 
                     <div className={`${attendance.statusAprv == 'onTime' ? 'hidden' : 'flex items-center gap-2'}`}>
                         <AlertDialog>
@@ -210,7 +246,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
                             </AlertDialogContent>
                         </AlertDialog>
 
-                        <span className={`rounded-md border px-3.5 py-2.5 text-xs font-medium`}>
+                        <span className={`rounded-md border px-3.5 py-2.5 text-xs font-medium bg-white`}>
                             {attendance.statusAprv}
                         </span>
                     </div>
@@ -269,7 +305,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
                 <div className="flex flex-col text-xs">
                     <span className="font-medium">{status_checkout}</span>
                     <span className="text-muted-foreground">Alasan pulang cepat:</span>
-                    <span className="rounded-md border p-2 text-muted-foreground">{early_reason}</span>
+                    <span className="rounded-md border bg-white p-2 text-muted-foreground">{early_reason}</span>
                 </div>
             );
         },
@@ -305,5 +341,21 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
         accessorKey: 'checkout_time',
         header: 'Jadwal Checkout',
         cell: ({ row }) => row.getValue('checkout_time') ?? '-',
+    },
+    {
+        id: 'action',
+        header: 'Aksi',
+        cell: ({ row }) => {
+            const attendance = row.original;
+
+            return (
+                <EditAttendanceDialog
+                    id={attendance.id}
+                    checkIn={attendance.check_in}
+                    checkOut={attendance.check_out}
+                    name={attendance.nama_karyawan}
+                />
+            );
+        },
     },
 ];

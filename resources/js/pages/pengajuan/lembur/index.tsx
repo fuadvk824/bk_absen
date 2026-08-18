@@ -78,7 +78,7 @@ export default function Index({ overtimes, filters, offices, departments }: Prop
         };
 
         setLocalFilters(defaultFilters);
-
+        
         router.get(
             route('overtime.index'),
             {},

@@ -8,7 +8,6 @@ use App\Models\Attendance;
 use App\Models\Office;
 use App\Models\Payroll;
 use App\Services\GeneratePayrollService;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

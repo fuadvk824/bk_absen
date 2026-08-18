@@ -47,9 +47,10 @@ class OvertimeController extends Controller
 
         $status = $request->status;
 
-        return redirect()
-            ->route('overtime.index')
-            ->with('success', "Status overtime berhasil di {$status}");
+        return back()->with(
+            'success',
+            "Status overtime berhasil di {$status}"
+        );
     }
 
     public function export(Request $request)

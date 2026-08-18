@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Akun Karyawan Aktif</title>
-     
+
 </head>
 
 <body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial, sans-serif;">
@@ -16,8 +16,8 @@
 
                     <tr>
                         <td align="center" style="padding:24px;background:#2563eb;">
-                           
-                          <img src="/public/logo/logo_gaji.jpg" style="height:60px;">
+
+                            <img src="/public/logo/logo_gaji.jpg" style="height:60px;">
                         </td>
                     </tr>
 
@@ -44,7 +44,7 @@
                             </table>
 
                             <p style="margin-top:16px;">
-                               Setelah anda berhasil login untuk pertama kali, demi kemanan akun silahkan untuk melakukan penggantian password yang sesuai pada menu profile
+                                Setelah anda berhasil login untuk pertama kali, demi kemanan akun silahkan untuk melakukan penggantian password yang sesuai.
                             </p>
 
 
@@ -58,13 +58,72 @@
                                 </a>
                             </p>
                             <p>
-                                <a href="https://absensif.bisakulak.my.id" style="color:#2563eb;">Klik link ini untuk IOS</a>
+                                <a href="https://absensif.bisakulak.my.id" style="color:#2563eb;">
+                                    Klik link ini untuk IOS
+                                </a>
                             </p>
 
                             <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
 
+                            <h3 style="margin-bottom:8px;color:#111;">
+                                Tutorial Install BISA ABSEN
+                            </h3>
+
+                            <p style="margin-bottom:8px;">
+                                <strong>Untuk Android:</strong>
+                            </p>
+
+                            <ol style="padding-left:20px;margin-top:8px;">
+                                <li style="margin-bottom:8px;">
+                                    Bagi yang sudah pernah menginstall aplikasi BK Absensi sebelumnya,
+                                    silakan uninstall aplikasi tersebut terlebih dahulu.
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Install aplikasi <strong>BISA ABSEN</strong>
+                                    (<strong>bisa-absen-v1.0.0.apk</strong>).
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Untuk pengguna iPhone, aplikasi dapat digunakan melalui web PWA.
+                                </li>
+                            </ol>
+
+                            <p style="margin-top:20px;margin-bottom:8px;">
+                                <strong>Untuk iPhone:</strong>
+                            </p>
+
+                            <ol style="padding-left:20px;margin-top:8px;">
+                                <li style="margin-bottom:8px;">
+                                    Klik link BISA ABSEN yang terdapat di email ini,
+                                    atau copy link tersebut dan buka menggunakan <strong>Safari</strong>.
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Login ke akun Anda dan lakukan penggantian password.
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Untuk melakukan absensi pertama kali, gunakan <strong>Safari</strong>
+                                    dan pastikan izin lokasi sudah diaktifkan.
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Untuk absensi berikutnya, Anda dapat menggunakan aplikasi
+                                    yang telah ditambahkan ke layar utama iPhone.
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Dari Safari, klik tombol <strong>Share/Bagikan</strong>.
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Gulir ke bawah, kemudian pilih
+                                    <strong>"Tambahkan ke Layar Utama"</strong>.
+                                </li>
+                                <li style="margin-bottom:8px;">
+                                    Setelah itu, BISA ABSEN akan muncul seperti aplikasi biasa
+                                    di menu iPhone Anda.
+                                </li>
+                            </ol>
+
+                            <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+
                             <p style="font-size:13px;color:#666;">
-                                Anda menerima email ini karena Admin / HRD dari 
+                                Anda menerima email ini karena Admin / HRD dari
                                 <strong>BISA KULAK</strong> telah menambahkan Anda ke aplikasi BK Absensi
                             </p>
 

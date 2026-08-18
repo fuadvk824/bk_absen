@@ -86,7 +86,10 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             Route::get('/', [AttendanceController::class, 'index'])->name('index');
             Route::put('/{attendance}/approval', [AttendanceController::class, 'approval'])
                 ->name('approval');
+            Route::put('/{attendance}', [AttendanceController::class, 'update'])
+                ->name('update');
         });
+
     Route::prefix('overtime')
         ->name('overtime.')
         ->group(function () {
@@ -107,7 +110,7 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             Route::delete('/{overtimeRate}', [OvertimeRateController::class, 'destroy'])->name('destroy');
         });
 
-    Route::prefix('shift')
+        Route::prefix('shift')
         ->name('shift.')
         ->group(function () {
             Route::get('/', [ShiftController::class, 'index'])->name('index');

@@ -44,7 +44,6 @@ class UpdateAkunSeeder extends Seeder
                 trim(strtolower($name)) => $id,
             ]
         );
-
         $departments = collect($departmentNames)->mapWithKeys(function ($name, $index) {
             return [
                 trim(strtolower($name)) => $index + 1,

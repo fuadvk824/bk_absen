@@ -16,7 +16,6 @@ class GeneratePayrollService
     public function handle(int $month, int $year, array $holidayDates = [])
     {
         $periodStart = Carbon::create($year, $month, 26)->subMonth()->startOfDay();
-
         $periodEnd = Carbon::create($year, $month, 25)->endOfDay();
 
         return DB::transaction(function () use ($month, $year, $periodStart, $periodEnd, $holidayDates) {

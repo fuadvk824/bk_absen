@@ -16,8 +16,6 @@ return new class extends Migration
 
             $table->string('version');
             $table->string('apk_url');
-            // $table->string('apk_arm64')->nullable();
-            // $table->string('apk_v7a')->nullable();
 
             $table->boolean('force_update')->default(false);
 

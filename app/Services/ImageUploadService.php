@@ -39,9 +39,55 @@ class ImageUploadService
         $encoded = $image->toWebp(80);
 
         Storage::disk('public')->makeDirectory($newFolderPath);
-
         Storage::disk('public')->put($newFolderPath . '/' . $filename, (string) $encoded);
 
         return $newFolderPath . '/' . $filename;
     }
+
+
+    // public function upload(
+    //     $file,
+    //     string $nameFile,
+    //     string $codeFolder,
+    //     string $indukFolder,
+    //     ?string $oldPath = null
+    // ): string {
+
+    //     $now = Carbon::now();
+
+    //     $folder = strtolower($now->format('M') . $now->format('Y'));
+    //     $folderOld = $folder . 'old';
+
+    //     $newFolderPath = $indukFolder . '/' . $folder . '/' . $codeFolder;
+    //     $oldFolderPath = $indukFolder . '/' . $folderOld . '/' . $codeFolder;
+
+    //     if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+
+    //         Storage::disk('public')->makeDirectory($oldFolderPath);
+
+    //         Storage::disk('public')->move(
+    //             $oldPath,
+    //             $oldFolderPath . '/' . basename($oldPath)
+    //         );
+    //     }
+
+    //     $random = Str::random(6);
+
+    //     $filename = strtolower(
+    //         $nameFile .
+    //             $now->format('Ymd') .
+    //             $random .
+    //             '.jpg'
+    //     );
+
+    //     Storage::disk('public')->makeDirectory($newFolderPath);
+
+    //     Storage::disk('public')->putFileAs(
+    //         $newFolderPath,
+    //         $file,
+    //         $filename
+    //     );
+
+    //     return $newFolderPath . '/' . $filename;
+    // }
 }

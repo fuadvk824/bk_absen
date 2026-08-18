@@ -78,8 +78,10 @@ class LeaveSubmitController extends Controller
                 'status' => $newStatus,
             ]);
         });
-        return redirect()
-            ->route('leavesubmit.index')
-            ->with('success', "Status pengajuan cuti berhasil di {$request->status}");
+
+        return back()->with(
+            'success',
+            "Status pengajuan cuti berhasil di {$request->status}"
+        );
     }
 }
