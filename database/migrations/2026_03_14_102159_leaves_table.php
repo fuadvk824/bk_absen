@@ -14,9 +14,7 @@ return new class extends Migration {
             $table->id();
 
             $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
-
             $table->foreignId('leave_categories_id')->constrained('leave_categories')->cascadeOnDelete();
-
             $table->date('submit');
 
             $table->date('start_date');

@@ -58,7 +58,6 @@ class Leave extends Model
                     ->whereHas('employee', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%");
                     });
-                    
             })
             ->when($request->status, function ($query) use ($request) {
                 $query->where('status', $request->status);
@@ -70,6 +69,20 @@ class Leave extends Model
             })
             ->when($request->leave_category_id, function ($query) use ($request) {
                 $query->where('leave_categories_id', $request->leave_category_id);
+            })
+            ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+                $query->whereBetween('start_date', [
+                    $request->start_date,
+                    $request->end_date,
+                ]);
+            })
+            // Jika hanya tanggal awal yang dipilih
+            ->when($request->start_date && !$request->end_date, function ($query) use ($request) {
+                $query->whereDate('start_date', '>=', $request->start_date);
+            })
+            // Jika hanya tanggal akhir yang dipilih
+            ->when(!$request->start_date && $request->end_date, function ($query) use ($request) {
+                $query->whereDate('start_date', '<=', $request->end_date);
             });
     }
 }

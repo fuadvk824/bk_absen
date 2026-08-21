@@ -16,8 +16,12 @@ import { Label } from '@/components/ui/label';
 import { useTableActions } from '@/lib/useTableAction';
 import { columnLeave } from './column-leave';
 
-import { RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { LeaveSubmitList } from '@/types/pengajuan/leavesubmitList';
+
+import { CalendarIcon, FileSpreadsheet, RefreshCw } from 'lucide-react';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Option {
     id: number;
@@ -34,6 +38,8 @@ interface Props {
         search?: string;
         office_id?: number;
         leave_category_id?: number;
+        start_date?: string;
+        end_date?: string;
         status?: string;
         perPage?: number;
     };
@@ -51,6 +57,8 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
         search: filters.search ?? '',
         office_id: filters.office_id ?? undefined,
         leave_category_id: filters.leave_category_id ?? undefined,
+        start_date: filters.start_date ?? '',
+        end_date: filters.end_date ?? '',
         status: filters.status ?? undefined,
         perPage: filters.perPage ?? 10,
     });
@@ -68,6 +76,8 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
             search: '',
             office_id: undefined,
             leave_category_id: undefined,
+            start_date: '',
+            end_date: '',
             status: undefined,
             perPage: 10,
         };
@@ -95,7 +105,7 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters}>
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                             <span className="hidden sm:block">Refresh</span>
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
 
                         <Button variant="outline" disabled onClick={() => handleExport(columnVisibility)}>
@@ -156,7 +166,6 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                             </SelectContent>
                         </Select>
                     </div>
-
                     <div className="space-y-1">
                         <Label>Status</Label>
                         <Select
@@ -173,6 +182,75 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                                 <SelectItem value="rejected">Rejected</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+                    <div className="space-y-1">
+                        <Label>Periode</Label>
+
+                        <div className="flex items-center gap-2">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="h-7 flex-1 justify-start p-4 font-normal">
+                                        <CalendarIcon className="h-3 w-3" />
+
+                                        {localFilters.start_date
+                                            ? format(new Date(localFilters.start_date), 'dd/MM/yyyy')
+                                            : 'From'}
+                                    </Button>
+                                </PopoverTrigger>
+
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={localFilters.start_date ? new Date(localFilters.start_date) : undefined}
+                                        onSelect={(date) =>
+                                            handleFilterChange(
+                                                localFilters,
+                                                setLocalFilters,
+                                                'start_date',
+                                                date ? format(date, 'yyyy-MM-dd') : '',
+                                            )
+                                        }
+                                        captionLayout="dropdown"
+                                        fromYear={2000}
+                                        toYear={2050}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+
+                            <span className="text-[10px] whitespace-nowrap text-muted-foreground">s/d</span>
+
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="h-7 flex-1 justify-start p-4 font-normal">
+                                        <CalendarIcon className="h-3 w-3" />
+
+                                        {localFilters.end_date
+                                            ? format(new Date(localFilters.end_date), 'dd/MM/yyyy')
+                                            : 'To'}
+                                    </Button>
+                                </PopoverTrigger>
+
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={localFilters.end_date ? new Date(localFilters.end_date) : undefined}
+                                        onSelect={(date) =>
+                                            handleFilterChange(
+                                                localFilters,
+                                                setLocalFilters,
+                                                'end_date',
+                                                date ? format(date, 'yyyy-MM-dd') : '',
+                                            )
+                                        }
+                                        captionLayout="dropdown"
+                                        fromYear={2000}
+                                        toYear={2050}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
                     </div>
                 </div>
 

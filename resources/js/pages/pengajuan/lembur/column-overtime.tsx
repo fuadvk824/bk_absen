@@ -40,7 +40,6 @@ const updateStatus = (id: number, status: string) => {
         },
     );
 
-   
 };
 
 export const columnOvertime: ColumnDef<OvertimeList>[] = [
