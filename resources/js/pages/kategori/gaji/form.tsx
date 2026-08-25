@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 import { toast } from 'sonner';
+import { formatRupiah } from '@/lib/formatRupiah';
+import { cn } from '@/lib/utils';
 
 interface Props {
     close: () => void;
@@ -25,9 +26,7 @@ export default function Form({ close, employees, initialData }: Props) {
 
     const { data, setData, post, put, processing, errors } = useForm({
         employee_id: initialData?.employee_id?.toString() ?? '',
-
         daily_salary: initialData?.daily_salary ?? '',
-
         effective_from: initialData?.effective_from ?? '',
     });
 
@@ -38,7 +37,6 @@ export default function Form({ close, employees, initialData }: Props) {
         };
 
         if (flash?.success) toast.success(flash.success);
-
         if (flash?.error) toast.error(flash.error);
 
         close();
@@ -53,9 +51,7 @@ export default function Form({ close, employees, initialData }: Props) {
 
         const options = {
             preserveScroll: true,
-
             onSuccess: handleSuccess,
-
             onError: handleError,
         };
 
@@ -105,11 +101,15 @@ export default function Form({ close, employees, initialData }: Props) {
 
                 <div className="col-span-2">
                     <Input
-                        type="number"
-                        placeholder="0"
-                        value={data.daily_salary}
-                        onChange={(e) => setData('daily_salary', e.target.value)}
-                        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        type="text"
+                        placeholder="Rp 0"
+                        value={formatRupiah(data.daily_salary || 0)}
+                        onChange={(e) => {
+                            const raw = e.target.value.replace(/[^0-9]/g, '');
+
+                            setData('daily_salary', Number(raw));
+                        }}
+                        className={cn('text-xs', errors.daily_salary && 'border-red-500')}
                     />
 
                     {errors.daily_salary && <p className="mt-1 text-sm text-red-500">{errors.daily_salary}</p>}

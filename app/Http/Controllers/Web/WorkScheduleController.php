@@ -107,7 +107,7 @@ class WorkScheduleController extends Controller
         // $currentEnd = $currentStart->copy()->addMonth()->day(25);
 
         // if ($startPeriod->ne($currentStart) || $endPeriod->ne($currentEnd)) 
-        if ( $now->gt($endPeriod)) {
+        if ($now->toDateString() > $endPeriod->toDateString()) {
             return redirect()->back()->with('error', 'Tidak bisa mengubah periode yang sudah lewat.');
         }
 
@@ -131,7 +131,7 @@ class WorkScheduleController extends Controller
         ]);
 
         $date = Carbon::parse($data['date']);
-        $now = now();
+        $today = now()->toDateString();
 
         $officeId = $request->input('office_id');
 
@@ -153,7 +153,10 @@ class WorkScheduleController extends Controller
             $startPeriod = Carbon::parse($day->workSchedule->start_date);
             $endPeriod = Carbon::parse($day->workSchedule->end_date);
 
-            if ($now->lt($startPeriod) || $now->gt($endPeriod)) {
+            if (
+                $today < $startPeriod->toDateString() ||
+                $today > $endPeriod->toDateString()
+            ) {
                 $skipped++;
                 continue;
             }
@@ -167,9 +170,15 @@ class WorkScheduleController extends Controller
         }
 
         if ($updated === 0) {
-            return back()->with('error', 'Tidak ada jadwal yang bisa diupdate (semua sudah lewat periode).');
+            return back()->with(
+                'error',
+                'Tidak ada jadwal yang bisa diupdate (semua sudah lewat periode).'
+            );
         }
 
-        return back()->with('success', "Bulk update berhasil. Updated: {$updated}, Skipped: {$skipped}");
+        return back()->with(
+            'success',
+            "Bulk update berhasil. Updated: {$updated}, Skipped: {$skipped}"
+        );
     }
 }

@@ -67,7 +67,9 @@ class SalaryController extends Controller
             Salary::create($request->validated());
         });
 
-        return redirect()->route('salary.index')->with('success', 'Salary berhasil ditambahkan.');
+        return redirect()
+            ->back()
+            ->with('success', 'Salary berhasil ditambahkan.');
     }
 
     public function update(SalaryRequest $request, Salary $salary)
@@ -76,13 +78,17 @@ class SalaryController extends Controller
             $salary->update($request->validated());
         });
 
-        return redirect()->route('salary.index')->with('success', 'Salary berhasil diperbarui.');
+        return redirect()
+            ->back()
+            ->with('success', 'Salary berhasil diperbarui.');
     }
 
     public function destroy(Salary $salary)
     {
         $salary->delete();
 
-        return redirect()->route('salary.index')->with('success', 'Salary berhasil dihapus.');
+        return redirect()
+            ->back()
+            ->with('success', 'Salary berhasil dihapus.');
     }
 }

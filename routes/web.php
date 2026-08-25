@@ -110,7 +110,7 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             Route::delete('/{overtimeRate}', [OvertimeRateController::class, 'destroy'])->name('destroy');
         });
 
-        Route::prefix('shift')
+    Route::prefix('shift')
         ->name('shift.')
         ->group(function () {
             Route::get('/', [ShiftController::class, 'index'])->name('index');
@@ -178,9 +178,9 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
         ->name('salary.')
         ->group(function () {
             Route::get('/', [SalaryController::class, 'index'])->name('index');
-            Route::get('/create', [SalaryController::class, 'create'])->name('create');
+
             Route::post('/store', [SalaryController::class, 'store'])->name('store');
-            Route::get('/{salary}/edit', [SalaryController::class, 'edit'])->name('edit');
+
             Route::put('/{salary}', [SalaryController::class, 'update'])->name('update');
             Route::delete('/{salary}', [SalaryController::class, 'destroy'])->name('destroy');
         });

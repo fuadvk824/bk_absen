@@ -44,17 +44,13 @@ interface Props {
 
 export default function Index({ salaries, employees, filters }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-
     const [isRefreshing, setIsRefreshing] = useState(false);
-
     const allColumns = ['employee_name', 'daily_salary', 'effective_from'];
 
     const [localFilters, setLocalFilters] = useState({
         search: filters.search ?? '',
         min_salary: filters.min_salary ?? '',
-
         max_salary: filters.max_salary ?? '',
-
         perPage: filters.perPage ?? 10,
     });
 
@@ -90,7 +86,6 @@ export default function Index({ salaries, employees, filters }: Props) {
 
 
     const [open, setOpen] = useState(false);
-
     const [selectedSalary, setSelectedSalary] = useState<SalaryList | null>(null);
 
     const openCreate = () => {
