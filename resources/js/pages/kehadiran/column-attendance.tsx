@@ -132,7 +132,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
 
             return (
                 <div className="flex flex-col gap-2">
-                    <div className="flex gap-1 items-center">
+                    <div className="flex items-center gap-1">
                         <span className={`w-fit rounded-md px-2 py-1 text-xs font-medium ${waktuClass}`}>
                             {isTepatWaktu
                                 ? 'Tepat Waktu'
@@ -246,7 +246,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
                             </AlertDialogContent>
                         </AlertDialog>
 
-                        <span className={`rounded-md border px-3.5 py-2.5 text-xs font-medium bg-white`}>
+                        <span className={`rounded-md border bg-white px-3.5 py-2.5 text-xs font-medium`}>
                             {attendance.statusAprv}
                         </span>
                     </div>
@@ -299,13 +299,42 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
         header: 'Status Pulang',
         cell: ({ row }) => {
             const status_checkout = row.getValue<string>('status_checkout') ?? '-';
+
+            const isTepatWaktu = status_checkout.includes('Tepat Waktu');
+            const isLebihCepat = status_checkout.includes('Lebih Cepat');
+            const isDalamJangkauan = status_checkout.includes('Dalam Jangkauan');
+            const isLuarJangkauan = status_checkout.includes('Luar Jangkauan');
+
             const early_reason = row.original.early_reason ?? '-';
 
+            const waktuClass = isTepatWaktu
+                ? 'bg-green-100 text-green-700'
+                : isLebihCepat
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-gray-100 text-gray-700';
+
+            const jangkauanClass = isDalamJangkauan
+                ? 'bg-green-100 text-green-700'
+                : isLuarJangkauan
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-gray-100 text-gray-700';
+
             return (
-                <div className="flex flex-col text-xs">
-                    <span className="font-medium">{status_checkout}</span>
-                    <span className="text-muted-foreground">Alasan pulang cepat:</span>
-                    <span className="rounded-md border bg-white p-2 text-muted-foreground">{early_reason}</span>
+                <div className="flex flex-col text-xs gap-2">
+                    <div className="flex items-center gap-1">
+                        <span className={`w-fit rounded-md px-2 py-1 text-xs font-medium ${waktuClass}`}>
+                            {isTepatWaktu ? 'Tepat Waktu' : isLebihCepat ? 'Lebih Cepat' : '-'}
+                        </span>
+                        <span>-</span>
+                        <span className={`w-fit rounded-md px-2 py-1 text-xs font-medium ${jangkauanClass}`}>
+                            {isDalamJangkauan ? 'Dalam Jangkauan' : isLuarJangkauan ? 'Luar Jangkauan' : '-'}
+                        </span>
+                    </div>
+
+                    <div className="flex flex-col rounded-md border bg-white p-2 text-muted-foreground min-w-52">
+                        <span className="text-black underline">Alasan pulang cepat:</span>
+                        {early_reason}
+                    </div>
                 </div>
             );
         },

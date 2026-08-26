@@ -1,7 +1,7 @@
 import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import type { ColumnDef, SortingState, VisibilityState } from '@tanstack/react-table';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -33,6 +33,19 @@ export function DataTable<TData>({
     onPerPageChange,
 }: DataTableProps<TData>) {
     const [sorting, setSorting] = useState<SortingState>([]);
+
+    const tableContainerRef = useRef<HTMLDivElement>(null);
+
+    const scrollTable = (direction: 'left' | 'right') => {
+        const container = tableContainerRef.current;
+        if (!container) return;
+        const amount = container.clientWidth * 0.7;
+
+        container.scrollTo({
+            left: direction === 'right' ? container.scrollLeft + amount : container.scrollLeft - amount,
+            behavior: 'smooth',
+        });
+    };
 
     const table = useReactTable({
         data,
@@ -71,7 +84,28 @@ export function DataTable<TData>({
 
     return (
         <div className="space-y-4 pb-16 text-xs">
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3">
+                <div className="flex justify-end gap-1">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-lg"
+                        onClick={() => scrollTable('left')}
+                    >
+                        ←
+                    </Button>
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-lg"
+                        onClick={() => scrollTable('right')}
+                    >
+                        →
+                    </Button>
+                </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm" className="cursor-pointer text-xs">
@@ -98,53 +132,58 @@ export function DataTable<TData>({
                 </DropdownMenu>
             </div>
 
-            <div className="overflow-x-auto rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((hg) => (
-                            <TableRow key={hg.id}>
-                                {hg.headers.map((h) => (
-                                    <TableHead
-                                        key={h.id}
-                                        className={`cursor-pointer bg-muted p-3 text-xs select-none ${getStickyClass(h.column, 'header')}`}
-                                        onClick={h.column.getToggleSortingHandler()}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {flexRender(h.column.columnDef.header, h.getContext())}
-                                            {{
-                                                asc: ' ▲',
-                                                desc: ' ▼',
-                                            }[h.column.getIsSorted() as string] ?? null}
-                                        </div>
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-
-                    <TableBody>
-                        {table.getRowModel().rows.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="group transition-colors duration-150 hover:bg-muted has-[[data-state=open]]:bg-muted">
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell
-                                            key={cell.id}
-                                            className={`p-3 text-xs transition-colors duration-150 group-hover:bg-muted  ${getStickyClass(cell.column, 'cell')} `}
+            <div ref={tableContainerRef} className="w-full overflow-x-auto rounded-md border">
+                <div className="w-max min-w-full">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((hg) => (
+                                <TableRow key={hg.id}>
+                                    {hg.headers.map((h) => (
+                                        <TableHead
+                                            key={h.id}
+                                            className={`cursor-pointer bg-muted p-3 text-xs select-none ${getStickyClass(h.column, 'header')}`}
+                                            onClick={h.column.getToggleSortingHandler()}
                                         >
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
+                                            <div className="flex items-center gap-2">
+                                                {flexRender(h.column.columnDef.header, h.getContext())}
+                                                {{
+                                                    asc: ' ▲',
+                                                    desc: ' ▼',
+                                                }[h.column.getIsSorted() as string] ?? null}
+                                            </div>
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="p-3 text-center text-xs">
-                                    No data
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            ))}
+                        </TableHeader>
+
+                        <TableBody>
+                            {table.getRowModel().rows.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        className="group transition-colors duration-150 hover:bg-muted has-[[data-state=open]]:bg-muted"
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell
+                                                key={cell.id}
+                                                className={`p-3 text-xs transition-colors duration-150 group-hover:bg-muted ${getStickyClass(cell.column, 'cell')} `}
+                                            >
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="p-3 text-center text-xs">
+                                        No data
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
 
             <div className="flex flex-col gap-4 text-xs md:flex-row md:items-center md:justify-between">
