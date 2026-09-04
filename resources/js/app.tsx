@@ -1,3 +1,13 @@
+import { Buffer } from 'buffer';
+
+declare global {
+    interface Window {
+        Buffer: typeof Buffer;
+    }
+}
+
+window.Buffer = Buffer;
+
 (window).Ziggy = Ziggy;
 // resources/js/app.tsx
 import 'leaflet/dist/leaflet.css';

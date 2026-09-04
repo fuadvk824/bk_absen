@@ -10,6 +10,7 @@ import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { LaravelPagination } from './pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface DataTableProps<TData> {
     columns: ColumnDef<TData>[];
@@ -68,18 +69,37 @@ export function DataTable<TData>({
         },
     });
 
+    // const getStickyClass = (column: any, type: 'header' | 'cell') => {
+    //     const sticky = column.columnDef.meta?.sticky;
+
+    //     if (!sticky) return '';
+
+    //     if (sticky === 'left') {
+    //         return type === 'header'
+    //             ? 'sticky left-0 z-40 bg-muted'
+    //             : 'sticky left-0 z-30 bg-white group-hover:bg-muted group-has-[[data-state=open]]:bg-muted';
+    //     }
+
+    //     return '';
+    // };
     const getStickyClass = (column: any, type: 'header' | 'cell') => {
         const sticky = column.columnDef.meta?.sticky;
 
-        if (!sticky) return '';
+        if (sticky !== 'left') return '';
 
-        if (sticky === 'left') {
-            return type === 'header'
-                ? 'sticky left-0 z-40 bg-muted'
-                : 'sticky left-0 z-30 bg-white group-hover:bg-muted group-has-[[data-state=open]]:bg-muted';
+        if (type === 'header') {
+            return ['sticky', 'left-0', 'z-50', 'bg-muted', 'shadow-[4px_0_6px_-4px_rgba(0,0,0,0.3)]'].join(' ');
         }
 
-        return '';
+        return [
+            'sticky',
+            'left-0',
+            'z-40',
+            'bg-white',
+            'shadow-[4px_0_6px_-4px_rgba(0,0,0,0.3)]',
+            'group-hover:bg-muted',
+            'group-has-[[data-state=open]]:bg-muted',
+        ].join(' ');
     };
 
     return (
@@ -93,7 +113,7 @@ export function DataTable<TData>({
                         className="h-8 w-8 p-0 text-lg"
                         onClick={() => scrollTable('left')}
                     >
-                        ←
+                        <ArrowLeft/>
                     </Button>
 
                     <Button
@@ -103,7 +123,7 @@ export function DataTable<TData>({
                         className="h-8 w-8 p-0 text-lg"
                         onClick={() => scrollTable('right')}
                     >
-                        →
+                        <ArrowRight/>
                     </Button>
                 </div>
                 <DropdownMenu>
@@ -167,7 +187,10 @@ export function DataTable<TData>({
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell
                                                 key={cell.id}
-                                                className={`p-3 text-xs transition-colors duration-150 group-hover:bg-muted ${getStickyClass(cell.column, 'cell')} `}
+                                                className={`p-3 text-xs transition-colors duration-150 ${getStickyClass(
+                                                    cell.column,
+                                                    'cell',
+                                                )}`}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </TableCell>

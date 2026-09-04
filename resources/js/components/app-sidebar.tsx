@@ -11,6 +11,7 @@ import {
     ChartBarStacked,
     Landmark,
     Receipt,
+    Mail,
 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -69,6 +70,10 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Jadwal Kerja',
                 href: '/workschedule',
+            },
+            {
+                title: 'Surat',
+                href: '/letter',
             },
         ],
     },
@@ -140,6 +145,7 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
+    
 ];
 
 const footerNavItems: NavItem[] = [

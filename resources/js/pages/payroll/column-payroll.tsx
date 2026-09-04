@@ -1,5 +1,3 @@
- 
-
 import { Button } from '@/components/ui/button';
 import { Payroll } from '@/types/payroll/payrollList';
 import { router } from '@inertiajs/react';
@@ -43,9 +41,7 @@ const updatePayrollStatus = (id: number) => {
     );
 };
 
-export const columnPayrolls = (
-    onShowDetail: (payroll: Payroll) => void,
-): ColumnDef<Payroll>[] => [
+export const columnPayrolls = (onShowDetail: (payroll: Payroll) => void): ColumnDef<Payroll>[] => [
     {
         accessorKey: 'employee.name',
         header: 'Karyawan',
@@ -57,9 +53,7 @@ export const columnPayrolls = (
                 <div>
                     <div className="font-medium">{employee.name}</div>
 
-                    <div className="text-xs text-muted-foreground">
-                        {employee.employee_code}
-                    </div>
+                    <div className="text-xs text-muted-foreground">{employee.employee_code}</div>
                 </div>
             );
         },
@@ -79,24 +73,21 @@ export const columnPayrolls = (
         accessorKey: 'basic_salary',
         header: 'Gaji Pokok',
 
-        cell: ({ row }) =>
-            Number(row.getValue('basic_salary')).toLocaleString('id-ID'),
+        cell: ({ row }) => Number(row.getValue('basic_salary')).toLocaleString('id-ID'),
     },
 
     {
         accessorKey: 'total_additions',
         header: 'Tambahan',
 
-        cell: ({ row }) =>
-            Number(row.getValue('total_additions')).toLocaleString('id-ID'),
+        cell: ({ row }) => Number(row.getValue('total_additions')).toLocaleString('id-ID'),
     },
 
     {
         accessorKey: 'total_deductions',
         header: 'Potongan',
 
-        cell: ({ row }) =>
-            Number(row.getValue('total_deductions')).toLocaleString('id-ID'),
+        cell: ({ row }) => Number(row.getValue('total_deductions')).toLocaleString('id-ID'),
     },
 
     {
@@ -104,9 +95,7 @@ export const columnPayrolls = (
         header: 'Gaji Bersih',
 
         cell: ({ row }) => (
-            <span className="font-semibold">
-                Rp {Number(row.getValue('net_salary')).toLocaleString('id-ID')}
-            </span>
+            <span className="font-semibold">Rp {Number(row.getValue('net_salary')).toLocaleString('id-ID')}</span>
         ),
     },
 
@@ -122,24 +111,20 @@ export const columnPayrolls = (
 
             return (
                 <div className="flex gap-2">
-                    <Button
-                        className="hover:scale-105"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onShowDetail(payroll)}
-                    >
+                    <Button className="hover:scale-105" size="sm" variant="outline" onClick={() => onShowDetail(payroll)}>
                         <Eye className="h-4 w-4" />
                     </Button>
 
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                            window.open(
-                                `/payroll/${payroll.id}/download`,
-                                '_blank',
-                            );
-                        }}
+                        onClick={() =>
+                            router.visit(
+                                route('payroll.pdf', {
+                                    payroll: payroll.id,
+                                }),
+                            )
+                        }
                         className="hover:scale-105"
                     >
                         <ArrowBigDownDash className="h-4 w-4" />
@@ -148,16 +133,10 @@ export const columnPayrolls = (
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button
-                                size="sm"
-                                disabled={isPaid}
-                                className="hover:scale-105"
-                            >
+                            <Button size="sm" disabled={isPaid} className="hover:scale-105">
                                 <Lock className="h-4 w-4" />
 
-                                {payroll.is_locked === 'bayar'
-                                    ? 'Bayar'
-                                    : 'Lunas'}
+                                {payroll.is_locked === 'bayar' ? 'Bayar' : 'Lunas'}
                             </Button>
                         </AlertDialogTrigger>
 
@@ -167,26 +146,19 @@ export const columnPayrolls = (
                                     <Receipt className="text-green-600" />
                                 </AlertDialogMedia>
 
-                                <AlertDialogTitle>
-                                    Konfirmasi Payroll
-                                </AlertDialogTitle>
+                                <AlertDialogTitle>Konfirmasi Payroll</AlertDialogTitle>
 
                                 <AlertDialogDescription>
-                                    Apakah kamu yakin ingin mengubah status payroll
-                                    menjadi <b>Lunas</b>?
+                                    Apakah kamu yakin ingin mengubah status payroll menjadi <b>Lunas</b>?
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
 
                             <AlertDialogFooter>
-                                <AlertDialogCancel className="cursor-pointer">
-                                    Cancel
-                                </AlertDialogCancel>
+                                <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
 
                                 <AlertDialogAction
                                     className="bg-green-600! hover:bg-black!"
-                                    onClick={() =>
-                                        updatePayrollStatus(payroll.id)
-                                    }
+                                    onClick={() => updatePayrollStatus(payroll.id)}
                                 >
                                     Ya, Bayar
                                 </AlertDialogAction>

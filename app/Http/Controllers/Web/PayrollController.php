@@ -89,16 +89,31 @@ class PayrollController extends Controller
             'payroll' => new PayrollResource($payroll),
         ]);
     }
-
-    public function downloadPdf($id)
+      public function pdf(Payroll $payroll)
     {
-        $payroll = Payroll::with(['employee.department', 'employee.position', 'items'])->findOrFail($id);
+        $payroll->load([
+            'employee.department',
+            'employee.position',
+            'items',
+        ]);
 
-        $basicSalaryItem = $payroll->items->where('name', 'Gaji Harian')->first();
-        $holidayBonusTotal = $payroll->items->where('name', 'Bonus Tanggal Merah')->sum('amount');
-        $overtimeTotal = $payroll->items->where('name', 'Lembur')->sum('amount');
-        $latePenaltyTotal = $payroll->items->where('name', 'Denda Keterlambatan')->sum('amount');
-        $additions = collect([]);
+        $basicSalaryItem = $payroll->items
+            ->where('name', 'Gaji Harian')
+            ->first();
+
+        $holidayBonusTotal = $payroll->items
+            ->where('name', 'Bonus Tanggal Merah')
+            ->sum('amount');
+
+        $overtimeTotal = $payroll->items
+            ->where('name', 'Lembur')
+            ->sum('amount');
+
+        $latePenaltyTotal = $payroll->items
+            ->where('name', 'Denda Keterlambatan')
+            ->sum('amount');
+
+        $additions = collect();
 
         if ($basicSalaryItem) {
             $additions->push([
@@ -124,7 +139,7 @@ class PayrollController extends Controller
             ]);
         }
 
-        $deductions = collect([]);
+        $deductions = collect();
 
         if ($latePenaltyTotal > 0) {
             $deductions->push([
@@ -134,26 +149,136 @@ class PayrollController extends Controller
             ]);
         }
 
-        $periodStart = Carbon::create($payroll->year, $payroll->month, 26)->subMonth()->translatedFormat('d F Y');
+        $periodStart = Carbon::create(
+            $payroll->year,
+            $payroll->month,
+            26
+        )
+            ->subMonth()
+            ->translatedFormat('d F Y');
 
-        $periodEnd = Carbon::create($payroll->year, $payroll->month, 25)->translatedFormat('d F Y');
+        $periodEnd = Carbon::create(
+            $payroll->year,
+            $payroll->month,
+            25
+        )->translatedFormat('d F Y');
 
-        $totalWorkDays = Attendance::where('employee_id', $payroll->employee_id)
+        $totalWorkDays = Attendance::query()
+            ->where('employee_id', $payroll->employee_id)
             ->whereBetween('tanggal', [
-                Carbon::create($payroll->year, $payroll->month, 26)->subMonth()->toDateString(),
+                Carbon::create(
+                    $payroll->year,
+                    $payroll->month,
+                    26
+                )->subMonth()->toDateString(),
 
-                Carbon::create($payroll->year, $payroll->month, 25)->toDateString(),
+                Carbon::create(
+                    $payroll->year,
+                    $payroll->month,
+                    25
+                )->toDateString(),
             ])
             ->count();
 
-        return inertia('payroll/slip-gaji', [
-            'payroll' => $payroll,
-            'employee' => $payroll->employee,
-            'additions' => $additions,
-            'deductions' => $deductions,
+        return Inertia::render('payroll/slip-gaji', [
+            'payroll' => [
+                'id' => $payroll->id,
+                'month' => $payroll->month,
+                'year' => $payroll->year,
+                'basic_salary' => $payroll->basic_salary,
+                'total_additions' => $payroll->total_additions,
+                'total_deductions' => $payroll->total_deductions,
+                'net_salary' => $payroll->net_salary,
+            ],
+
+            'employee' => [
+                'name' => $payroll->employee->name,
+                'employee_code' => $payroll->employee->employee_code,
+                'department' => $payroll->employee->department
+                    ? [
+                        'name' => $payroll->employee->department->name,
+                    ]
+                    : null,
+
+                'position' => $payroll->employee->position
+                    ? [
+                        'name' => $payroll->employee->position->name,
+                    ]
+                    : null,
+            ],
+
+            'additions' => $additions->values(),
+            'deductions' => $deductions->values(),
             'periodStart' => $periodStart,
             'periodEnd' => $periodEnd,
             'totalWorkDays' => $totalWorkDays,
         ]);
     }
+
+    // public function downloadPdf($id)
+    // {
+    //     $payroll = Payroll::with(['employee.department', 'employee.position', 'items'])->findOrFail($id);
+
+    //     $basicSalaryItem = $payroll->items->where('name', 'Gaji Harian')->first();
+    //     $holidayBonusTotal = $payroll->items->where('name', 'Bonus Tanggal Merah')->sum('amount');
+    //     $overtimeTotal = $payroll->items->where('name', 'Lembur')->sum('amount');
+    //     $latePenaltyTotal = $payroll->items->where('name', 'Denda Keterlambatan')->sum('amount');
+    //     $additions = collect([]);
+
+    //     if ($basicSalaryItem) {
+    //         $additions->push([
+    //             'name' => 'Gaji Harian',
+    //             'keterangan' => 'Total gaji dalam 1 bulan',
+    //             'amount' => $basicSalaryItem->amount,
+    //         ]);
+    //     }
+
+    //     if ($holidayBonusTotal > 0) {
+    //         $additions->push([
+    //             'name' => 'Bonus Tanggal Merah',
+    //             'keterangan' => 'Total bonus masuk hari libur',
+    //             'amount' => $holidayBonusTotal,
+    //         ]);
+    //     }
+
+    //     if ($overtimeTotal > 0) {
+    //         $additions->push([
+    //             'name' => 'Bonus Lembur',
+    //             'keterangan' => 'Total bonus lembur',
+    //             'amount' => $overtimeTotal,
+    //         ]);
+    //     }
+
+    //     $deductions = collect([]);
+
+    //     if ($latePenaltyTotal > 0) {
+    //         $deductions->push([
+    //             'name' => 'Denda Keterlambatan',
+    //             'keterangan' => 'Total denda keterlambatan',
+    //             'amount' => $latePenaltyTotal,
+    //         ]);
+    //     }
+
+    //     $periodStart = Carbon::create($payroll->year, $payroll->month, 26)->subMonth()->translatedFormat('d F Y');
+
+    //     $periodEnd = Carbon::create($payroll->year, $payroll->month, 25)->translatedFormat('d F Y');
+
+    //     $totalWorkDays = Attendance::where('employee_id', $payroll->employee_id)
+    //         ->whereBetween('tanggal', [
+    //             Carbon::create($payroll->year, $payroll->month, 26)->subMonth()->toDateString(),
+
+    //             Carbon::create($payroll->year, $payroll->month, 25)->toDateString(),
+    //         ])
+    //         ->count();
+
+    //     return inertia('payroll/slip-gaji', [
+    //         'payroll' => $payroll,
+    //         'employee' => $payroll->employee,
+    //         'additions' => $additions,
+    //         'deductions' => $deductions,
+    //         'periodStart' => $periodStart,
+    //         'periodEnd' => $periodEnd,
+    //         'totalWorkDays' => $totalWorkDays,
+    //     ]);
+    // }
 }

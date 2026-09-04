@@ -42,6 +42,7 @@ class HomeController extends Controller
             'employeeId' => $employee->id,
             'userId' => $user->id,
             'name' => $user->name,
+            'jenis_kelamin' => $user->jenis_kelamin,
 
             'key_status' => $user->key_status,
 
@@ -62,7 +63,9 @@ class HomeController extends Controller
         $today = Carbon::today()->toDateString();
         $employeeId = $request->user()->employees->id;
 
-        $attendance = Attendance::where('employee_id', $employeeId)->where('tanggal', $today)->first();
+        $attendance = Attendance::query()
+            ->where('employee_id', $employeeId)
+            ->where('tanggal', $today)->first();
 
         $scheduleDay = WorkScheduleDay::whereDate('work_date', $today)
             ->whereHas('workSchedule', function ($q) use ($employeeId) {
@@ -153,20 +156,13 @@ class HomeController extends Controller
 
         $employeeId = $request->user()->employees->id;
         $employeeCode = $request->user()->employees->employee_code;
+        $employee = Employee::with(['shift', 'office'])->findOrFail($employeeId);
 
-        $employee = Employee::with(['shift', 'office'])
-            ->findOrFail($employeeId);
-
-        // $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
-        // $todayDate = Carbon::now($timezone)->toDateString();
-        // $checkInTime = Carbon::now($timezone);
         $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
+
         if ($request->filled('checkin_at')) {
-            // waktu asli dari HP saat offline
-            $checkInTime = Carbon::parse($request->checkin_at)
-                ->timezone($timezone);
+            $checkInTime = Carbon::parse($request->checkin_at)->timezone($timezone);
         } else {
-            // checkin normal online
             $checkInTime = Carbon::now($timezone);
         }
 
@@ -177,6 +173,7 @@ class HomeController extends Controller
                 $q->where('employee_id', $employeeId);
             })
             ->first();
+
         $leave = Leave::where('employee_id', $employeeId)
             ->where('status', 'approved')
             ->whereDate('start_date', '<=', $todayDate)
@@ -184,37 +181,28 @@ class HomeController extends Controller
             ->first();
 
         if (!$scheduleDay) {
-            return response()->json(
-                [
-                    'message' => 'Jadwal tidak ditemukan',
-                ],
-                422,
-            );
+            return response()->json([
+                'message' => 'Jadwal tidak ditemukan'
+            ], 422);
         }
 
         if ($scheduleDay->is_off || $leave) {
-
             $message = $leave
                 ? 'Anda sedang cuti, tidak bisa checkin'
                 : 'Hari ini libur, tidak bisa checkin';
 
-            return response()->json(
-                [
-                    'message' => $message,
-                ],
-                422,
-            );
+            return response()->json([
+                'message' => $message
+            ], 422);
         }
 
-        $exists = Attendance::where('employee_id', $employeeId)->where('tanggal', $todayDate)->first();
+        $exists = Attendance::where('employee_id', $employeeId)
+            ->where('tanggal', $todayDate)->first();
 
         if ($exists) {
-            return response()->json(
-                [
-                    'message' => 'Sudah checkin hari ini',
-                ],
-                400,
-            );
+            return response()->json([
+                'message' => 'Sudah checkin hari ini'
+            ], 400);
         }
 
         return DB::transaction(function () use (
@@ -229,19 +217,21 @@ class HomeController extends Controller
             $employee = Employee::with('shift')->findOrFail($employeeId);
 
             if (!$employee->shift) {
-                return response()->json(['message' => 'Shift belum diatur'], 400);
+                return response()->json([
+                    'message' => 'Shift belum diatur'
+                ], 400);
             }
 
-            $todayDay = strtolower(
-                Carbon::now($timezone)
-                    ->locale('id')
-                    ->dayName
-            );
+            // $todayDay = strtolower(Carbon::now($timezone)->locale('id')->dayName);
+            $todayDay = Carbon::parse($todayDate, $timezone)->locale('id')->dayName;
+            $todayDay = strtolower($todayDay);
 
             $shiftDetail = ShiftDetail::where('shift_id', $employee->shift_id)->where('day_of_week', $todayDay)->first();
 
             if (!$shiftDetail) {
-                return response()->json(['message' => 'Shift hari ini tidak ditemukan'], 400);
+                return response()->json([
+                    'message' => 'Shift hari ini tidak ditemukan'
+                ], 400);
             }
 
             $shiftCheckout = Carbon::today($timezone)
@@ -254,8 +244,14 @@ class HomeController extends Controller
             }
 
             $imagePath = null;
+
             if ($request->hasFile('gambar_checkin')) {
-                $imagePath = $imageService->upload($request->file('gambar_checkin'), 'att', $employeeCode, 'attendance');
+                $imagePath = $imageService->upload(
+                    $request->file('gambar_checkin'),
+                    'att',
+                    $employeeCode,
+                    'attendance'
+                );
             }
 
             $shiftCheckin = Carbon::today($timezone)
@@ -278,12 +274,11 @@ class HomeController extends Controller
             }
 
             $isLateWithoutTolerance = $lateMinutes > $toleransi;
+            $late_reason = $request->late_reason;
 
             if ($isLateWithoutTolerance) {
-                if (!$request->late_reason) {
-                    return response()->json([
-                        'message' => 'Anda terlambat, wajib isi alasan'
-                    ], 422);
+                if (!$late_reason) {
+                    $late_reason = 'Default alasan terlambat dari sistem';
                 }
             }
 
@@ -302,7 +297,6 @@ class HomeController extends Controller
             $finalStatus = $statusUtama . ' - ' . $rangeStatus;
 
             $statusAprv = $isLateWithoutTolerance ? 'pending' : 'onTime';
-
             Attendance::create([
                 'employee_id' => $employeeId,
                 'gambar_checkin' => $imagePath,
@@ -318,7 +312,7 @@ class HomeController extends Controller
                 'status_checkin' => $finalStatus,
 
                 'status' => $lateMinutes > 0 ? 'late' : 'ontime',
-                'late_reason' => $request->late_reason,
+                'late_reason' => $late_reason,
                 'late_proof' => $lateProofPath,
                 'statusAprv' => $statusAprv,
 
@@ -333,225 +327,149 @@ class HomeController extends Controller
         });
     }
 
-    // public function checkIn(Request $request, ImageUploadService $imageService)
-    // {
-    //     $request->validate([
-    //         'location_status' => 'required',
-    //         'gambar_checkin' => 'required|image',
+    public function checkOut(
+        Request $request,
+        ImageUploadService $imageService
+    ) {
+        $request->validate([
+            'location_status' => 'required',
+            'gambar_checkout' => 'required|image',
+            'early_reason' => 'nullable|string',
+            'checkout_at' => 'nullable|date',
+        ]);
 
-    //         'late_reason' => 'nullable|string',
-    //         'late_proof' => 'nullable|image',
-    //         'checkin_at' => 'nullable|date',
-    //     ]);
+        $employee = $request->user()->employees;
+        $employeeId = $employee->id;
+        $employeeCode = $employee->employee_code;
 
-    //     $employeeId = $request->user()->employees->id;
-    //     $employeeCode = $request->user()->employees->employee_code;
+        $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
 
-    //     $employee = Employee::with(['shift', 'office'])
-    //         ->findOrFail($employeeId);
+        if ($request->filled('checkout_at')) {
+            $checkOutTime = Carbon::parse($request->checkout_at)
+                ->timezone($timezone);
+        } else {
+            $checkOutTime = Carbon::now($timezone);
+        }
 
-    //     $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
+        $attendanceDate = $checkOutTime->toDateString();
 
-    //     if ($request->filled('checkin_at')) {
-    //         $checkInTime = Carbon::parse($request->checkin_at)
-    //             ->timezone($timezone);
-    //     } else {
-    //         $checkInTime = Carbon::now($timezone);
-    //     }
+        $attendance = Attendance::where('employee_id', $employeeId)
+            ->where('tanggal', $attendanceDate)
+            ->first();
 
-    //     $todayDate = $checkInTime->toDateString();
+        if (!$attendance) {
+            return response()->json([
+                'message' => 'Belum checkin',
+            ], 400);
+        }
 
-    //     $scheduleDay = WorkScheduleDay::whereDate('work_date', $todayDate)
-    //         ->whereHas('workSchedule', function ($q) use ($employeeId) {
-    //             $q->where('employee_id', $employeeId);
-    //         })
-    //         ->first();
+        if ($attendance->check_out) {
+            return response()->json([
+                'message' => 'Sudah checkout',
+            ], 400);
+        }
 
-    //     $leave = Leave::where('employee_id', $employeeId)
-    //         ->where('status', 'approved')
-    //         ->whereDate('start_date', '<=', $todayDate)
-    //         ->whereDate('end_date', '>=', $todayDate)
-    //         ->first();
+        return DB::transaction(function () use (
+            $request,
+            $imageService,
+            $attendance,
+            $employeeCode,
+            $employee,
+            $timezone,
+            $checkOutTime
+        ) {
 
-    //     if (!$scheduleDay) {
-    //         return response()->json([
-    //             'message' => 'Jadwal tidak ditemukan',
-    //         ], 422);
-    //     }
+            $imagePath = null;
 
-    //     if ($scheduleDay->is_off || $leave) {
+            if ($request->hasFile('gambar_checkout')) {
+                $imagePath = $imageService->upload(
+                    $request->file('gambar_checkout'),
+                    'att',
+                    $employeeCode,
+                    'attendance'
+                );
+            }
 
-    //         $message = $leave
-    //             ? 'Anda sedang cuti, tidak bisa checkin'
-    //             : 'Hari ini libur, tidak bisa checkin';
+            $checkIn = Carbon::parse(
+                $attendance->tanggal,
+                $timezone
+            )->setTimeFromTimeString(
+                $attendance->check_in
+            );
 
-    //         return response()->json([
-    //             'message' => 'scheduleDay->is_off ' . $message,
-    //         ], 422);
-    //     }
+            $totalWaktu = $checkIn->diffInMinutes($checkOutTime);
 
-    //     $exists = Attendance::where('employee_id', $employeeId)
-    //         ->where('tanggal', $todayDate)
-    //         ->first();
+            $hari = Carbon::parse(
+                $attendance->tanggal,
+                $timezone
+            )->locale('id')->dayName;
 
-    //     if ($exists) {
-    //         return response()->json([
-    //             'message' => 'Sudah checkin hari ini',
-    //         ], 400);
-    //     }
+            $hari = strtolower($hari);
 
-    //     return DB::transaction(function () use (
-    //         $request,
-    //         $employee,
-    //         $employeeId,
-    //         $todayDate,
-    //         $checkInTime,
-    //         $timezone,
-    //         $imageService,
-    //         $employeeCode,
-    //     ) {
+            $shiftDetail = ShiftDetail::where(
+                'shift_id',
+                $employee->shift_id
+            )
+                ->where('day_of_week', $hari)
+                ->where('is_active', true)
+                ->first();
 
-    //         // $employee = Employee::with('shift')->findOrFail($employeeId);
-    //         if (!$employee->shift) {
-    //             return response()->json([
-    //                 'message' => 'Shift belum diatur'
-    //             ], 400);
-    //         }
+            $rangeStatus = $request->location_status;
+            $finalStatus = 'Tepat Waktu - ' . $rangeStatus;
+            $earlyReason = null;
 
-    //         $todayDay = strtolower(
-    //             $checkInTime
-    //                 ->copy()
-    //                 ->locale('id')
-    //                 ->dayName
-    //         );
+            if ($shiftDetail && $shiftDetail->checkout_time) {
 
-    //         $shiftDetail = ShiftDetail::where('shift_id', $employee->shift_id)
-    //             ->where('day_of_week', $todayDay)
-    //             ->where('is_active', true)
-    //             ->first();
+                $shiftCheckout = Carbon::parse(
+                    $attendance->tanggal,
+                    $timezone
+                )->setTimeFromTimeString(
+                    $shiftDetail->checkout_time
+                );
 
-    //         if (!$shiftDetail) {
-    //             return response()->json([
-    //                 'message' => 'Shift hari ini tidak ditemukan'
-    //             ], 400);
-    //         }
+                if ($checkOutTime->lt($shiftCheckout)) {
 
-    //         $shiftCheckout = Carbon::parse(
-    //             $todayDate . ' ' . $shiftDetail->checkout_time,
-    //             $timezone
-    //         );
+                    $earlyReason = $request->filled('early_reason')
+                        ? $request->early_reason
+                        : 'Default alasan pulang cepat dari sistem';
 
-    //         if ($checkInTime->gt($shiftCheckout)) {
-    //             return response()->json([
-    //                 'message' => 'Tidak bisa check-in setelah jam kerja berakhir'
-    //             ], 422);
-    //         }
+                    $finalStatus = 'Lebih Cepat - ' . $rangeStatus;
+                } else {
 
-    //         $imagePath = null;
-    //         if ($request->hasFile('gambar_checkin')) {
-    //             $imagePath = $imageService->upload(
-    //                 $request->file('gambar_checkin'),
-    //                 'att',
-    //                 $employeeCode,
-    //                 'attendance'
-    //             );
-    //         }
+                    $finalStatus = 'Tepat Waktu - ' . $rangeStatus;
+                }
+            }
 
-    //         $shiftCheckin = Carbon::parse(
-    //             $todayDate . ' ' . $shiftDetail->checkin_time,
-    //             $timezone
-    //         );
+            $attendance->update([
+                'check_out' => $checkOutTime->format('H:i:s'),
+                'gambar_checkout' => $imagePath,
 
-    //         $lateMinutes = 0;
+                'status_checkout' => $finalStatus,
+                'early_reason' => $earlyReason,
+                'total_waktu' => $totalWaktu,
 
-    //         if ($checkInTime->gt($shiftCheckin)) {
-    //             $lateMinutes = $shiftCheckin->diffInMinutes($checkInTime);
-    //         }
+                'latitude_checkout' => $request->latitude_checkout,
+                'longitude_checkout' => $request->longitude_checkout,
+                'distance_checkout' => $request->distance_checkout,
 
-    //         $toleransi = $employee->shift->toleransi_late ?? 0;
+                'device' => $request->device ?? 'Mobile',
+            ]);
 
-    //         if ($lateMinutes === 0) {
-    //             $statusUtama = 'Tepat Waktu';
-    //         } elseif ($lateMinutes <= $toleransi) {
-    //             $statusUtama = 'Terlambat Dengan Toleransi';
-    //         } else {
-    //             $statusUtama = 'Terlambat Tanpa Toleransi';
-    //         }
-
-    //         // $isLateWithoutTolerance = $lateMinutes > $toleransi;
-
-    //         // if ($isLateWithoutTolerance && !$request->filled('late_reason')) {
-    //         //     return response()->json([
-    //         //         'message' => 'Anda terlambat, wajib isi alasan'
-    //         //     ], 422);
-    //         // }
-
-    //         $isLateWithoutTolerance = $lateMinutes > $toleransi;
-
-    //         $lateReason = $request->filled('late_reason')
-    //             ? $request->late_reason
-    //             : ($isLateWithoutTolerance ? 'Tidak ada alasan yang diberikan' : null);
-
-    //         $lateProofPath = null;
-
-    //         if ($request->hasFile('late_proof')) {
-    //             $lateProofPath = $imageService->upload(
-    //                 $request->file('late_proof'),
-    //                 'late',
-    //                 $employeeCode,
-    //                 'attendance'
-    //             );
-    //         }
-
-    //         $rangeStatus = $request->location_status;
-    //         $finalStatus = $statusUtama . ' - ' . $rangeStatus;
-
-    //         $statusAprv = $isLateWithoutTolerance ? 'pending' : 'onTime';
-
-    //         Attendance::create([
-    //             'employee_id' => $employeeId,
-    //             'gambar_checkin' => $imagePath,
-    //             // 'gambar_checkin' => null,
-
-    //             'tanggal' => $todayDate,
-    //             'name_shift' => $employee->shift->name_shift,
-
-    //             'check_in' => $checkInTime->format('H:i:s'),
-
-    //             'checkin_time' => $shiftDetail->checkin_time,
-    //             'checkout_time' => $shiftDetail->checkout_time,
-    //             'toleransi_late' => $toleransi,
-    //             'late_minutes' => $lateMinutes,
-
-    //             'status_checkin' => $finalStatus,
-    //             'status' => $lateMinutes > 0 ? 'late' : 'ontime',
-
-    //             'late_reason' => $lateReason,
-    //             'late_proof' => $lateProofPath,
-    //             'statusAprv' => $statusAprv,
-
-    //             'latitude_checkin' => $request->latitude_checkin,
-    //             'longitude_checkin' => $request->longitude_checkin,
-    //             'distance_checkin' => $request->distance_checkin,
-
-    //             'device' => $request->device ?? 'Mobile',
-    //         ]);
-
-    //         return response()->json([
-    //             'message' => 'Checkin Success'
-    //         ], 201);
-    //     });
-    // }
+            return response()->json([
+                'message' => 'Checkout berhasil',
+            ], 200);
+        });
+    }
 
     // public function checkOut(Request $request, ImageUploadService $imageService)
     // {
     //     $request->validate([
     //         'location_status' => 'required',
     //         'gambar_checkout' => 'required|image',
+
     //         'early_reason' => 'nullable|string',
     //         'checkout_at' => 'nullable|date',
     //     ]);
-
     //     $employee = $request->user()->employees;
 
     //     $employeeId = $employee->id;
@@ -559,51 +477,31 @@ class HomeController extends Controller
 
     //     $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
 
-    //     // ==============================
-    //     // Tentukan waktu checkout
-    //     // ==============================
-    //     if ($request->filled('checkout_at')) {
-    //         // Checkout dari data offline
-    //         $checkOutTime = Carbon::parse($request->checkout_at)
-    //             ->timezone($timezone);
-    //     } else {
-    //         // Checkout normal (online)
-    //         $checkOutTime = Carbon::now($timezone);
-    //     }
-
-    //     $attendanceDate = $checkOutTime->toDateString();
-
-    //     // ==============================
-    //     // Cari attendance sesuai tanggal checkout
-    //     // ==============================
+    //     $today = Carbon::now($timezone)->toDateString();
     //     $attendance = Attendance::where('employee_id', $employeeId)
-    //         ->where('tanggal', $attendanceDate)
-    //         ->first();
+    //         ->where('tanggal', $today)->first();
 
     //     if (!$attendance) {
     //         return response()->json([
     //             'message' => 'Belum checkin',
     //         ], 400);
     //     }
+
     //     if ($attendance->check_out) {
     //         return response()->json([
     //             'message' => 'Sudah checkout',
     //         ], 400);
     //     }
 
-    //     return DB::transaction(function () use (
-    //         $request,
-    //         $imageService,
-    //         $attendance,
-    //         $employeeCode,
-    //         $employee,
-    //         $timezone,
-    //         $checkOutTime
-    //     ) {
+    //     return DB::transaction(function () use ($request, $imageService, $attendance, $employeeCode, $employee, $timezone) {
 
-    //         // ==============================
-    //         // Upload foto checkout
-    //         // ==============================
+    //         if ($request->filled('checkout_at')) {
+    //             $checkOutTime = Carbon::parse($request->checkout_at)
+    //                 ->timezone($timezone);
+    //         } else {
+    //             $checkOutTime = Carbon::now($timezone);
+    //         }
+
     //         $imagePath = null;
 
     //         if ($request->hasFile('gambar_checkout')) {
@@ -615,66 +513,36 @@ class HomeController extends Controller
     //             );
     //         }
 
-    //         // ==============================
-    //         // Hitung total waktu kerja
-    //         // ==============================
-    //         $checkIn = Carbon::parse(
-    //             Carbon::parse($attendance->tanggal)->format('Y-m-d')
-    //                 . ' ' .
-    //                 $attendance->check_in,
-    //             $timezone
-    //         );
-
+    //         $checkIn = Carbon::today($timezone)
+    //             ->setTimeFromTimeString($attendance->check_in);
     //         $totalWaktu = $checkIn->diffInMinutes($checkOutTime);
 
-    //         // ==============================
-    //         // Cari shift hari tersebut
-    //         // ==============================
-    //         $hari = strtolower(
-    //             $checkOutTime
-    //                 ->copy()
-    //                 ->locale('id')
-    //                 ->dayName
-    //         );
+    //         $hari = strtolower(Carbon::now($timezone)->locale('id')->dayName);
 
     //         $shiftDetail = ShiftDetail::where('shift_id', $employee->shift_id)
     //             ->where('day_of_week', $hari)
     //             ->where('is_active', true)
     //             ->first();
 
-    //         // ==============================
-    //         // Status checkout
-    //         // ==============================
     //         $rangeStatus = $request->location_status;
     //         $finalStatus = 'Tepat Waktu - ' . $rangeStatus;
 
     //         $earlyReason = null;
-
     //         if ($shiftDetail && $shiftDetail->checkout_time) {
-
-    //             $shiftCheckout = Carbon::parse(
-    //                 Carbon::parse($attendance->tanggal)->format('Y-m-d')
-    //                     . ' ' .
-    //                     $shiftDetail->checkout_time,
-    //                 $timezone
-    //             );
+    //             $shiftCheckout = Carbon::today($timezone)
+    //                 ->setTimeFromTimeString($shiftDetail->checkout_time);
 
     //             if ($checkOutTime->lt($shiftCheckout)) {
-
     //                 $earlyReason = $request->filled('early_reason')
     //                     ? $request->early_reason
-    //                     : 'Default sistem pulang cepat';
+    //                     : 'Default alasan pulang cepat dari sistem';
 
     //                 $finalStatus = 'Lebih Cepat - ' . $rangeStatus;
     //             } else {
-
     //                 $finalStatus = 'Tepat Waktu - ' . $rangeStatus;
     //             }
     //         }
 
-    //         // ==============================
-    //         // Update attendance
-    //         // ==============================
     //         $attendance->update([
     //             'check_out' => $checkOutTime->format('H:i:s'),
     //             'gambar_checkout' => $imagePath,
@@ -695,115 +563,4 @@ class HomeController extends Controller
     //         ], 200);
     //     });
     // }
-
-
-    public function checkOut(Request $request, ImageUploadService $imageService)
-    {
-        $request->validate([
-            'location_status' => 'required',
-            'gambar_checkout' => 'required|image',
-
-            'early_reason' => 'nullable|string',
-            'checkout_at' => 'nullable|date',
-        ]);
-        $employee = $request->user()->employees;
-
-        $employeeId = $employee->id;
-        $employeeCode = $employee->employee_code;
-
-        $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
-        $today = Carbon::now($timezone)->toDateString();
-
-        $attendance = Attendance::where('employee_id', $employeeId)->where('tanggal', $today)->first();
-
-        if (!$attendance) {
-            return response()->json(
-                [
-                    'message' => 'Belum checkin',
-                ],
-                400,
-            );
-        }
-
-        if ($attendance->check_out) {
-            return response()->json(
-                [
-                    'message' => 'Sudah checkout',
-                ],
-                400,
-            );
-        }
-
-        return DB::transaction(function () use ($request, $imageService, $attendance, $employeeCode, $employee, $timezone) {
-            // $checkOutTime = Carbon::now($timezone);
-            if ($request->filled('checkout_at')) {
-                // waktu asli dari HP saat offline
-                $checkOutTime = Carbon::parse($request->checkout_at)
-                    ->timezone($timezone);
-            } else {
-                // checkout online
-                $checkOutTime = Carbon::now($timezone);
-            }
-
-            $imagePath = null;
-
-            if ($request->hasFile('gambar_checkout')) {
-                $imagePath = $imageService->upload($request->file('gambar_checkout'), 'att', $employeeCode, 'attendance');
-            }
-
-            $checkIn = Carbon::today($timezone)->setTimeFromTimeString($attendance->check_in);
-            $totalWaktu = $checkIn->diffInMinutes($checkOutTime);
-
-            $hari = strtolower(
-                Carbon::now($timezone)
-                    ->locale('id')
-                    ->dayName
-            );
-
-            $shiftDetail = ShiftDetail::where('shift_id', $employee->shift_id)
-                ->where('day_of_week', $hari)
-                ->where('is_active', true)
-                ->first();
-
-            $rangeStatus = $request->location_status;
-            $finalStatus = 'Tepat Waktu - ' . $rangeStatus;
-
-            $earlyReason = null;
-            if ($shiftDetail && $shiftDetail->checkout_time) {
-                $shiftCheckout = Carbon::today($timezone)
-                    ->setTimeFromTimeString($shiftDetail->checkout_time);
-
-                if ($checkOutTime->lt($shiftCheckout)) {
-                    $earlyReason = $request->filled('early_reason')
-                        ? $request->early_reason
-                        : 'Default sistem pulang cepat';
-
-                    $finalStatus = 'Lebih Cepat - ' . $rangeStatus;
-                } else {
-                    $finalStatus = 'Tepat Waktu - ' . $rangeStatus;
-                }
-            }
-            $attendance->update([
-                'check_out' => $checkOutTime->format('H:i:s'),
-                'gambar_checkout' => $imagePath,
-
-                'status_checkout' => $finalStatus,
-                'early_reason' => $earlyReason,
-                'total_waktu' => $totalWaktu,
-
-                'latitude_checkout' => $request->latitude_checkout,
-                'longitude_checkout' => $request->longitude_checkout,
-                'distance_checkout' => $request->distance_checkout,
-
-                'device' => $request->device ?? 'Mobile',
-            ]);
-
-            return response()->json(
-                [
-                    'message' => 'Checkout berhasil',
-                ],
-                200,
-            );
-        });
-    }
 }

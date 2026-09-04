@@ -4,6 +4,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\LeaveController;
+use App\Http\Controllers\Api\LetterController;
 use App\Http\Controllers\Api\OvertimeController;
 use App\Http\Controllers\Api\WorkScheduleController;
 use App\Models\AppVersion;
@@ -45,4 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/leaves', [LeaveController::class, 'index']);
     Route::post('/leaves', [LeaveController::class, 'store']);
     Route::get('/leave-categories', [LeaveController::class, 'categories']);
+
+    Route::get('/myletters', [LetterController::class, 'myletters']);
+    Route::post('/letters/{letter}/read', [LetterController::class, 'markAsRead']);
 });

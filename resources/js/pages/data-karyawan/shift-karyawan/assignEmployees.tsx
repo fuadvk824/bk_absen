@@ -103,7 +103,7 @@ export default function AssignEmployees({ shift, employees, offices, filters, cu
 
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
-    };
+    };                                            
 
     const handleSubmit = () => {
         if (selectedIds.length === 0) {

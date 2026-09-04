@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\EmployeeController;
 use App\Http\Controllers\Web\ExportController;
 use App\Http\Controllers\Web\LeaveController;
 use App\Http\Controllers\Web\LeaveSubmitController;
+use App\Http\Controllers\Web\LetterController;
 use App\Http\Controllers\Web\OfficeController;
 use App\Http\Controllers\Web\OvertimeController;
 use App\Http\Controllers\Web\OvertimeRateController;
@@ -163,15 +164,32 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             Route::get('/', [LeaveSubmitController::class, 'index'])->name('index');
             Route::patch('/{leavesubmit}/status', [LeaveSubmitController::class, 'updateStatus'])->name('updateStatus');
         });
+    // Route::prefix('payroll')
+    //     ->name('payroll.')
+    //     ->group(function () {
+    //         Route::get('/', [PayrollController::class, 'index'])->name('index');
+    //         Route::post('/generate', [PayrollController::class, 'generate'])->name('generate');
+    //         Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
+    //         Route::patch('/payroll/{payroll}/lock', [PayrollController::class, 'lock'])->name('lock');
+    //         // Route::get('/{id}/download', [PayrollController::class, 'downloadPdf'])->name('downloadPdf');
+    //         Route::get('/{id}/download', [PayrollController::class, 'downloadPdf'])->name('download');
+    //     });
     Route::prefix('payroll')
         ->name('payroll.')
         ->group(function () {
             Route::get('/', [PayrollController::class, 'index'])->name('index');
-            Route::post('/generate', [PayrollController::class, 'generate'])->name('generate');
-            Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
-            Route::patch('/payroll/{payroll}/lock', [PayrollController::class, 'lock'])->name('lock');
-            // Route::get('/{id}/download', [PayrollController::class, 'downloadPdf'])->name('downloadPdf');
-            Route::get('/{id}/download', [PayrollController::class, 'downloadPdf'])->name('download');
+
+            Route::post('/generate', [PayrollController::class, 'generate'])
+                ->name('generate');
+
+            Route::get('/{payroll}', [PayrollController::class, 'show'])
+                ->name('show');
+
+            Route::patch('/{payroll}/lock', [PayrollController::class, 'lock'])
+                ->name('lock');
+
+            Route::get('/{payroll}/pdf', [PayrollController::class, 'pdf'])
+                ->name('pdf');
         });
 
     Route::prefix('salary')
@@ -200,6 +218,21 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
 
             Route::get('/attendance/export', [ExportController::class, 'attendanceExport'])
                 ->name('attendance.export');
+        });
+
+    Route::prefix('letter')
+        ->name('letter.')
+        ->group(function () {
+            Route::get('/', [LetterController::class, 'index'])->name('index');
+            Route::post('/', [LetterController::class, 'store'])->name('store');
+            Route::put('/{letter}', [LetterController::class, 'update'])->name('update');
+            Route::delete('/{letter}', [LetterController::class, 'destroy'])->name('destroy');
+            Route::get('/{letter}/pdf', [LetterController::class, 'pdf'])
+                ->name('pdf');
+            Route::get('/{letter}/pdf/download', [LetterController::class, 'downloadPdf'])
+                ->name('pdf.download');
+            Route::post('/{letter}/send', [LetterController::class, 'send'])
+                ->name('send');
         });
 
     Route::get('/employee/export', [EmployeeController::class, 'export'])->name('employee.export');
