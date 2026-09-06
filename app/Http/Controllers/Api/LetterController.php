@@ -7,6 +7,7 @@ use App\Http\Resources\Api\LetterResource;
 use App\Models\Employee;
 use App\Models\Letter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class LetterController extends Controller
 {
@@ -72,4 +73,5 @@ class LetterController extends Controller
             'message' => 'Surat berhasil ditandai sudah dibaca',
         ]);
     }
+
 }

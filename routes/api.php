@@ -49,4 +49,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/myletters', [LetterController::class, 'myletters']);
     Route::post('/letters/{letter}/read', [LetterController::class, 'markAsRead']);
+
 });

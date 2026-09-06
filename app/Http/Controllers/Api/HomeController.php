@@ -48,9 +48,13 @@ class HomeController extends Controller
 
             'department' => optional($employee->department)->name,
             'position' => optional($employee->position)->name,
+
             'checkin_time' => $shiftDetail?->checkin_time,
             'checkout_time' => $shiftDetail?->checkout_time,
             'toleransi_late' => $employee->shift?->toleransi_late,
+
+            'office_name' => $employee->office?->name,
+            'office_address' => $employee->office?->address,
 
             'office_latitude' => $employee->office?->latitude,
             'office_longitude' => $employee->office?->longitude,
