@@ -17,7 +17,7 @@ class VersionSeeder extends Seeder
         DB::transaction(function () {
             AppVersion::create([
                 'version' => "1.0.0",
-                'apk_url' => "https://unincarcerated-darron-matchlessly.ngrok-free.dev/apk/bisa-absen-v1.0.0.apk",
+                'apk_url' => "https://absensi.bisakulak.my.id/apk/bisa-absen-v1.0.0.apk",
                 // 'apk_arm64' => "https://absensi.bisakulak.my.id/apk/app-v1.0.0-arm64-v8a.apk",
                 // 'apk_v7a' => "https://absensi.bisakulak.my.id/apk/app-v1.0.0-armeabi-v7a.apk",
                 'force_update' => true,
@@ -26,4 +26,3 @@ class VersionSeeder extends Seeder
         });
     }
 }
- 

@@ -160,7 +160,13 @@ class HomeController extends Controller
 
         $employeeId = $request->user()->employees->id;
         $employeeCode = $request->user()->employees->employee_code;
+
         $employee = Employee::with(['shift', 'office'])->findOrFail($employeeId);
+        if ($employee->status === 'inactive') {
+            return response()->json([
+                'message' => 'Employee sudah tidak aktif, tidak bisa melakukan check-in',
+            ], 403);
+        }
 
         $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
 
@@ -345,6 +351,12 @@ class HomeController extends Controller
         $employee = $request->user()->employees;
         $employeeId = $employee->id;
         $employeeCode = $employee->employee_code;
+
+        if ($employee->status === 'inactive') {
+            return response()->json([
+                'message' => 'Employee sudah tidak aktif, tidak bisa melakukan check-out',
+            ], 403);
+        }
 
         $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
 

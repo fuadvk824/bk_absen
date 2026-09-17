@@ -32,3 +32,8 @@ yarn-error.log
 database/seeders/AkunSeeder.php
 database/seeders/RolePermissionSeeder.php
 /storage/app/backup-bk-absen-24f0fd89b97f.json
+
+/public/surat/*
+!/public/surat/.gitkeep
+/public/apk/*
+!/public/apk/.gitkeep
