@@ -3,69 +3,54 @@
 namespace Database\Seeders;
 
 use App\Models\Attendance;
-use App\Models\Employee;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 
 class AttendanceSeeder extends Seeder
 {
     public function run(): void
     {
-        $employees = Employee::all();
+        Attendance::create([
+            'employee_id' => 80,
 
-        if ($employees->isEmpty()) {
-            $this->command->warn('Data employee belum tersedia.');
-            return;
-        }
+            'gambar_checkin' => null,
+            'gambar_checkout' => null,
 
-        $today = Carbon::today();
+            'tanggal' => '2026-09-14',
+            'name_shift' => 'Normal',
 
-        foreach ($employees as $employee) {
-            
+            'check_in' => '08:01:00',
+            'check_out' => null,
 
-            Attendance::create([
-                'employee_id' => $employee->id,
+            'checkin_time' => '08:03:00',
+            'checkout_time' => '17:00:00',
 
-                'gambar_checkin' => null,
-                'gambar_checkout' => null,
+            'toleransi_late' => 5,
+            'late_minutes' => 2,
+            'total_waktu' => 0,
 
-                'tanggal' => $today->toDateString(),
-                'name_shift' => 'Shift Pagi',
+            'status_checkin' => 'Terlambat Dengan Toleransi - Luar Jangkauan',
+            'status_checkout' => null,
 
-                'check_in' => '08:00:00',
-                'check_out' => '17:00:00',
+            'status' => 'ontime',
 
-                'checkin_time' => '08:00:00',
-                'checkout_time' => '17:00:00',
+            'late_reason' => null,
+            'late_proof' => null,
+            'early_reason' => null,
 
-                'toleransi_late' => 15,
-                'late_minutes' => 0,
-                'total_waktu' => 540,
+            'statusAprv' => 'onTime',
 
-                'status_checkin' => 'checked_in',
-                'status_checkout' => 'checked_out',
+            'latitude_checkin' => -7.8165449,
+            'longitude_checkin' => 111.9892214,
+            'distance_checkin' => 10831.01,
 
-                'status' => 'ontime',
+            'latitude_checkout' => null,
+            'longitude_checkout' => null,
+            'distance_checkout' => null,
 
-                'late_reason' => null,
-                'late_proof' => null,
-                'early_reason' => null,
+            'device' => 'Android',
 
-                'statusAprv' => 'onTime',
-
-                'latitude_checkin' => -7.250445,
-                'longitude_checkin' => 112.768845,
-                'distance_checkin' => 10.50,
-
-                'latitude_checkout' => -7.250445,
-                'longitude_checkout' => 112.768845,
-                'distance_checkout' => 12.30,
-
-                'device' => 'Seeder',
-
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+            'created_at' => '2026-09-11 08:00:00',
+            'updated_at' => '2026-09-11 17:00:00',
+        ]);
     }
 }

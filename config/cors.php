@@ -19,9 +19,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://absensif.bisakulak.my.id'],
+    'allowed_origins' => ['https://absensif.bisakulak.my.id', 'https://dev.bisakulak.my.id'],
     // 'allowed_origins' => ['*'],
-    
+
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
