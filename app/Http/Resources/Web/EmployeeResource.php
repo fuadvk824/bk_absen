@@ -20,13 +20,14 @@ class EmployeeResource extends JsonResource
             'employee_code'        => $this->employee_code,
             'nama_karyawan'        => $this->name,
             'jabatan'              => $this->position?->name,
+            'departemen'           => $this->department?->name,
+            'office'               => $this->office?->name,
             'tanggal_awal_kerja'   => $this->tanggal_awal_kerja,
             'no_telepon'           => $this->user?->no_telepon,
             'tanggal_lahir'        => $this->user?->tanggal_lahir,
             'alamat'               => $this->user?->alamat,
             'status'               => $this->status,
             'name_shift'           => $this->shift?->name_shift,
-            'office'               => $this->office?->name,
         ];
     }
 

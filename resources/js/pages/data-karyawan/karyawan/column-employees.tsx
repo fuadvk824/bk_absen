@@ -91,6 +91,11 @@ export const columnEmployees: ColumnDef<EmployeeList>[] = [
         cell: ({ row }) => row.getValue('jabatan') ?? '-',
     },
     {
+        accessorKey: 'departemen',
+        header: 'Departemen',
+        cell: ({ row }) => row.getValue('departemen') ?? '-',
+    },
+    {
         accessorKey: 'office',
         header: 'Office',
         cell: ({ row }) => row.getValue('office') ?? '-',

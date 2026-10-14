@@ -1,5 +1,4 @@
-
-import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image, StyleSheet, Svg, Path } from '@react-pdf/renderer';
 import type { Letter, LetterType } from '@/types/type-table/letter';
 
 const styles = StyleSheet.create({
@@ -192,6 +191,46 @@ const styles = StyleSheet.create({
     signatureSpace: {
         height: 25,
     },
+
+    // KONFIRMASI PENERIMAAN SURAT________________________________________
+
+    acknowledgementSection: {
+        position: 'absolute',
+        bottom: 20,
+        left: 55,
+        right: 55,
+        paddingTop: 10,
+        borderTopWidth: 0.7,
+        borderTopColor: '#999999',
+    },
+
+    acknowledgementRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+
+    checkbox: {
+        width: 11,
+        height: 11,
+        borderWidth: 1,
+        borderColor: '#111111',
+        marginRight: 8,
+        marginTop: 1,
+    },
+
+    acknowledgementText: {
+        flex: 1,
+        fontSize: 10,
+        lineHeight: 1.35,
+        textAlign: 'left',
+    },
+    checkmarkSvg: {
+        position: 'absolute',
+        left: 0.5,
+        top: 0.5,
+        width: 9,
+        height: 9,
+    },
 });
 
 const letterTypeLabels: Record<LetterType, string> = {
@@ -263,7 +302,13 @@ const formatDate = (date?: string | null) => {
     return `${day} ${monthNames[monthIndex]} ${year}`;
 };
 
-export const LetterDocument = ({ letter }: { letter: Letter }) => {
+// export const LetterDocument = ({ letter }: { letter: Letter }) => {
+interface LetterDocumentProps {
+    letter: Letter;
+    isRead?: boolean;
+}
+
+export const LetterDocument = ({ letter, isRead = false }: LetterDocumentProps) => {
     const isWarning = letter.jenis_surat === 'SP1' || letter.jenis_surat === 'SP2';
     const isPhk = letter.jenis_surat === 'SP3';
 
@@ -343,7 +388,6 @@ export const LetterDocument = ({ letter }: { letter: Letter }) => {
     return (
         <Document>
             <Page size="A4" style={styles.page}>
-
                 <View style={styles.header}>
                     <View style={styles.logoContainer}>
                         <Image src="/logo/logo_gaji.jpg" style={styles.logo} />
@@ -418,8 +462,29 @@ export const LetterDocument = ({ letter }: { letter: Letter }) => {
                         <Text style={styles.signatureName}>{letter.name || '-'}</Text>
                     </View>
                 </View>
+                <View style={styles.acknowledgementSection}>
+                    <View style={styles.acknowledgementRow}>
+                        <View style={styles.checkbox}>
+                            {isRead && (
+                                <Svg viewBox="0 0 12 12" style={styles.checkmarkSvg}>
+                                    <Path
+                                        d="M1.5 6.2 L4.5 9 L10.5 2.5"
+                                        stroke="#111111"
+                                        strokeWidth={1.5}
+                                        fill="none"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                </Svg>
+                            )}
+                        </View>
+
+                        <Text style={styles.acknowledgementText}>
+                            Saya telah membaca, memahami, dan menyetujui isi Surat Peringatan ini.
+                        </Text>
+                    </View>
+                </View>
             </Page>
         </Document>
     );
 };
-

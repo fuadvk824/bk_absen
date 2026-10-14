@@ -129,7 +129,7 @@ class WorkScheduleController extends Controller
             'shift_id' => 'nullable|exists:shifts,id',
             'is_off' => 'required|boolean',
         ]);
-
+        
         $date = Carbon::parse($data['date']);
         $today = now()->toDateString();
 

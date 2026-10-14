@@ -19,7 +19,7 @@ class GeneratePayrollService
         $periodEnd = Carbon::create($year, $month, 25)->endOfDay();
 
         return DB::transaction(function () use ($month, $year, $periodStart, $periodEnd, $holidayDates) {
-            $employees = Employee::whereIn('status', ['magang', 'kontrak'])->get();
+            $employees = Employee::whereIn('status', ['magang', 'kontrak'])->where('id', 24)->get();
 
             foreach ($employees as $employee) {
                 $alreadyExists = Payroll::where('employee_id', $employee->id)

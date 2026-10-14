@@ -5,19 +5,19 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\LetterController;
+use App\Http\Controllers\Api\OffdayRequestController;
 use App\Http\Controllers\Api\OvertimeController;
 use App\Http\Controllers\Api\WorkScheduleController;
 use App\Models\AppVersion;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/app-version', function () {
-//     return AppVersion::latest()->first();
-// });
-
-// public/apk/app-v1.0.5.apk
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+    ]);
+});
 
 Route::get('/app-version', function () {
-
     $version = AppVersion::latest()->first();
 
     return response()->json([
@@ -50,4 +50,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/myletters', [LetterController::class, 'myletters']);
     Route::post('/letters/{letter}/read', [LetterController::class, 'markAsRead']);
 
+
+    Route::get('/offday/schedule', [OffdayRequestController::class, 'schedule']);
+    Route::post('/offday/requests', [OffdayRequestController::class, 'store']);
+    Route::delete(
+        '/offday/requests/{id}',
+        [OffdayRequestController::class, 'destroy']
+    );
+
+    Route::post('/easter-egg/viewed', [AuthController::class, 'viewed']);
 });

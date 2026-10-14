@@ -6,7 +6,7 @@ export interface EmployeeList {
     nama_karyawan: string;
     jabatan: string;
     departemen: string;
-    company: string;
+    office: string;
     tanggal_mulai_kerja?: string;
     no_telepon?: string;
     tanggal_lahir?: string;

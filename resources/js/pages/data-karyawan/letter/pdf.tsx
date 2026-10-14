@@ -15,6 +15,8 @@ interface Props {
 }
 
 export default function LetterPdf({ letter }: Props) {
+    console.log('LETTER PREVIEW:', letter);
+    console.log('READ AT:', letter.read_at);
     const fileName = `${letter.nomor_surat.replace(/\//g, '_')}-${letter.employee_code}.pdf`;
 
     const handleBack = () => {
@@ -39,7 +41,6 @@ export default function LetterPdf({ letter }: Props) {
             <Head title={`Surat ${letter.nomor_surat}`} />
 
             <div className="space-y-4 p-5">
-
                 <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                         <h1 className="text-xl font-semibold">Preview Surat</h1>
@@ -54,7 +55,10 @@ export default function LetterPdf({ letter }: Props) {
                             <span className="hidden sm:inline">Kembali</span>
                         </Button>
 
-                        <PDFDownloadLink document={<LetterDocument letter={letter} />} fileName={fileName}>
+                        <PDFDownloadLink
+                            document={<LetterDocument letter={letter} isRead={!!letter.read_at} />}
+                            fileName={fileName}
+                        >
                             {({ loading }) => (
                                 <Button className="cursor-pointer" disabled={loading}>
                                     <Download className="mr-2 h-4 w-4" />
@@ -67,20 +71,11 @@ export default function LetterPdf({ letter }: Props) {
                 </div>
 
                 <div className="overflow-hidden rounded-xl border bg-muted">
-                    <PDFViewer
-                        width="100%"
-                        height="800px"
-                        showToolbar={false}
-                        // style={{
-                        //     border: 'none',
-                        //     display: 'block',
-                        // }}
-                    >
-                        <LetterDocument letter={letter} />
+                    <PDFViewer width="100%" height="800px" showToolbar={false}>
+                        <LetterDocument letter={letter} isRead={!!letter.read_at} />
                     </PDFViewer>
                 </div>
             </div>
         </AppLayout>
     );
 }
- 

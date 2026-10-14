@@ -15,6 +15,7 @@ export type Letter = {
     pdf_path?: string | null;
     pdf_url?: string | null;
     sent_at?: string | null;
+    read_at?: string | null;
 };
 
 export type LetterEmployee = {

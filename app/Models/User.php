@@ -83,4 +83,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActivityLog::class);
     }
+    public function eastereggview()
+    {
+        return $this->hasMany(EasterEggView::class);
+    }
 }

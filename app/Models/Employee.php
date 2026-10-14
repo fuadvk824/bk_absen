@@ -81,6 +81,11 @@ class Employee extends Model
         return $this->hasMany(Letter::class);
     }
 
+    public function offdayRequests()
+    {
+        return $this->hasMany(OffdayRequest::class);
+    }
+
     public function workScheduleCurrentMonth()
     {
         $today = now();

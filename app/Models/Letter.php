@@ -15,6 +15,7 @@ class Letter extends Model
         'tanggal_surat',
         'alasan_surat',
         'pdf_path',
+        'pdf_read_path',
         'sent_at',
         'read_at',
     ];

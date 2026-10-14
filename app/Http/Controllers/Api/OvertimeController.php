@@ -16,43 +16,114 @@ class OvertimeController extends Controller
     public function myovertime(Request $request)
     {
         $user = $request->user();
-        $employee = Employee::query()->where('user_id', $user->id)->first();
+
+        $employee = Employee::query()
+            ->where('user_id', $user->id)
+            ->first();
 
         if (!$employee) {
-            return response()->json(
-                [
-                    'message' => 'Employee not found',
-                ],
-                404,
-            );
+            return response()->json([
+                'message' => 'Employee not found',
+            ], 404);
         }
+
+        $period = (int) $request->query(
+            'period',
+            Carbon::today()->day >= 26
+                ? Carbon::today()->month
+                : Carbon::today()->subMonth()->month
+        );
+
+        if ($period < 1 || $period > 12) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Periode tidak valid.',
+            ], 422);
+        }
+
+        $today = Carbon::today();
+        $year = $today->year;
+
+        // Periode 12 pada Januari berarti Desember tahun sebelumnya
+        if ($period == 12 && $today->month == 1) {
+            $year--;
+        }
+
+        $periodStart = Carbon::create(
+            $year,
+            $period,
+            26
+        )->startOfDay();
+
+        $periodEnd = $periodStart
+            ->copy()
+            ->addMonthNoOverflow()
+            ->day(25)
+            ->endOfDay();
 
         $overtimes = Overtime::with('overtimeRate')
             ->where('employee_id', $employee->id)
+            ->whereBetween('date', [
+                $periodStart->toDateString(),
+                $periodEnd->toDateString(),
+            ])
             ->orderBy('date', 'desc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'date' => Carbon::parse($item->date)->format('Y-m-d'),
-                    'time_from' => Carbon::parse($item->time_from)->format('H:i'),
-                    'time_to' => Carbon::parse($item->time_to)->format('H:i'),
-                    'reason' => $item->reason,
-                    'status' => $item->status,
+            ->get();
 
-                    'warna' => match ($item->status) {
-                        'pending' => 0xffffc107,
-                        'approved' => 0xff4caf50,
-                        'rejected' => 0xfff44336,
-                        default => 0xff9e9e9e,
-                    },
-                ];
-            });
+        $totalOvertimeMinutes = 0;
+
+        $data = $overtimes->map(function ($item) use (&$totalOvertimeMinutes) {
+            $totalMinutes = 0;
+
+            if ($item->status === 'approved') {
+                try {
+                    $from = Carbon::parse($item->time_from);
+                    $to = Carbon::parse($item->time_to);
+
+                    $fromMinutes = ($from->hour * 60) + $from->minute;
+                    $toMinutes = ($to->hour * 60) + $to->minute;
+
+                    $totalMinutes = $toMinutes - $fromMinutes;
+
+                    // Melewati tengah malam
+                    if ($totalMinutes < 0) {
+                        $totalMinutes += 24 * 60;
+                    }
+
+                    $totalOvertimeMinutes += $totalMinutes;
+                } catch (\Throwable $e) {
+                    $totalMinutes = 0;
+                }
+            }
+            return [
+                'id' => $item->id,
+                'date' => Carbon::parse($item->date) ->format('Y-m-d'),
+                'time_from' => Carbon::parse($item->time_from) ->format('H:i'),
+                'time_to' => Carbon::parse($item->time_to) ->format('H:i'),
+                'reason' => $item->reason,
+                'status' => $item->status,
+                'total_minutes' => $totalMinutes,
+                'warna' => match ($item->status) {
+                    'pending' => 0xffffc107,
+                    'approved' => 0xff4caf50,
+                    'rejected' => 0xfff44336,
+                    default => 0xff9e9e9e,
+                },
+            ];
+        })->values();
 
         return response()->json([
             'success' => true,
-            'message' => 'Data overtime berhasil diambil',
-            'data' => $overtimes,
+            'message' => 'Data lembur berhasil diambil',
+
+            'period' => [
+                'value' => $period,
+                'start' => $periodStart->format('Y-m-d'),
+                'end' => $periodEnd->format('Y-m-d'),
+                'total_overtime_minutes' => $totalOvertimeMinutes,
+            ],
+
+            'data' => $data,
         ]);
     }
 
@@ -78,13 +149,8 @@ class OvertimeController extends Controller
 
         $employeeId = $employee->id;
 
-        // $date = Carbon::parse($request->date);
         $timezone = $employee->office?->timezone ?? 'Asia/Jakarta';
         $date = Carbon::parse($request->date, $timezone);
-
-
-        // $timeFromDateTime = Carbon::parse($date->toDateString() . ' ' . $request->time_from);
-        // $timeToDateTime   = Carbon::parse($date->toDateString() . ' ' . $request->time_to);
 
         $timeFromDateTime = Carbon::parse(
             $date->toDateString() . ' ' . $request->time_from,
@@ -95,15 +161,7 @@ class OvertimeController extends Controller
             $timezone
         );
 
-
-        // $exists = Overtime::where('employee_id', $employeeId)
-        //     ->where('date', $request->date)
-        //     ->where(function ($q) use ($request) {
-        //         $q->where('time_from', '<', $request->time_to)
-        //             ->where('time_to', '>', $request->time_from);
-        //     })
-        //     ->exists();
-        $exists = Overtime::where('employee_id', $employeeId)
+        $exists = Overtime::query()->where('employee_id', $employeeId)
             ->where('date', $date->toDateString())
             ->where(function ($q) use ($request) {
                 $q->where('time_from', '<', $request->time_to)
@@ -143,9 +201,6 @@ class OvertimeController extends Controller
             );
         }
 
-        // $checkinDateTime = Carbon::parse($date->toDateString() . ' ' . $shiftDetail->checkin_time);
-        // $checkoutDateTime = Carbon::parse($date->toDateString() . ' ' . $shiftDetail->checkout_time);
-
         $checkinDateTime = Carbon::parse(
             $date->toDateString() . ' ' . $shiftDetail->checkin_time,
             $timezone
@@ -155,7 +210,6 @@ class OvertimeController extends Controller
             $timezone
         );
 
-        // handle shift lintas hari (contoh: 22:00 - 06:00)
         if ($checkoutDateTime->lte($checkinDateTime)) {
             $checkoutDateTime->addDay();
         }

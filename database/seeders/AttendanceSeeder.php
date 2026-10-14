@@ -10,25 +10,25 @@ class AttendanceSeeder extends Seeder
     public function run(): void
     {
         Attendance::create([
-            'employee_id' => 80,
+            'employee_id' => 24,
 
             'gambar_checkin' => null,
             'gambar_checkout' => null,
 
-            'tanggal' => '2026-09-14',
+            'tanggal' => '2026-09-16',
             'name_shift' => 'Normal',
 
-            'check_in' => '08:01:00',
+            'check_in' => '08:00:00',
             'check_out' => null,
 
-            'checkin_time' => '08:03:00',
+            'checkin_time' => '08:01:00',
             'checkout_time' => '17:00:00',
 
             'toleransi_late' => 5,
             'late_minutes' => 2,
             'total_waktu' => 0,
 
-            'status_checkin' => 'Terlambat Dengan Toleransi - Luar Jangkauan',
+            'status_checkin' => 'Tepat Waktu - Dalam Jangkauan',
             'status_checkout' => null,
 
             'status' => 'ontime',
@@ -49,8 +49,8 @@ class AttendanceSeeder extends Seeder
 
             'device' => 'Android',
 
-            'created_at' => '2026-09-11 08:00:00',
-            'updated_at' => '2026-09-11 17:00:00',
+            'created_at' => '2026-09-12 08:00:00',
+            'updated_at' => '2026-09-12 17:00:00',
         ]);
     }
 }

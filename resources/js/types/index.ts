@@ -13,10 +13,17 @@ export type SharedData = {
 };
 
 
+// export interface NavItem {
+//     title: string;
+//     icon?: LucideIcon;
+//     href?: string;
+//     children?: NavItem[];
+// }
+
 export interface NavItem {
     title: string;
-    icon?: LucideIcon;
     href?: string;
+    icon?: LucideIcon;
     children?: NavItem[];
+    roles?: string[];
 }
-

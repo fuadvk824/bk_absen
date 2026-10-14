@@ -116,13 +116,9 @@ class LetterController extends Controller
                 $validated['employee_id']
             );
 
-            if ($letter->pdf_path) {
-                $pdfPath = public_path($letter->pdf_path);
-
-                if (File::exists($pdfPath)) {
-                    File::delete($pdfPath);
-                }
-            }
+            // Hapus kedua PDF lama
+            $this->deletePdf($letter->pdf_path);
+            $this->deletePdf($letter->pdf_read_path);
 
             $letter->update([
                 'employee_id' => $employee->id,
@@ -133,69 +129,92 @@ class LetterController extends Controller
                 'tanggal_surat' => $validated['tanggal_surat'],
                 'alasan_surat' => $validated['alasan_surat'],
 
+                // PDF harus dibuat ulang setelah surat diedit
                 'pdf_path' => null,
+                'pdf_read_path' => null,
                 'sent_at' => null,
+                'read_at' => null,
             ]);
         });
 
         return redirect()
             ->route('letter.index')
-            ->with('success', 'Data surat berhasil diperbarui.');
+            ->with(
+                'success',
+                'Data surat berhasil diperbarui.'
+            );
     }
 
     public function destroy(Letter $letter)
     {
-        if ($letter->pdf_path) {
-            $pdfPath = public_path($letter->pdf_path);
+        // Hapus PDF biasa
+        $this->deletePdf($letter->pdf_path);
 
-            if (File::exists($pdfPath)) {
-                File::delete($pdfPath);
-            }
-        }
+        // Hapus PDF versi sudah dibaca
+        $this->deletePdf($letter->pdf_read_path);
 
         $letter->delete();
 
         return redirect()
             ->route('letter.index')
-            ->with('success', 'Data surat berhasil dihapus.');
+            ->with(
+                'success',
+                'Data surat berhasil dihapus.'
+            );
     }
 
     public function send(Request $request, Letter $letter)
     {
         $request->validate([
             'pdf' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'pdf_read' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         DB::transaction(function () use ($request, $letter) {
             $directory = public_path('surat');
 
-            if (! File::exists($directory)) {
+            if (!File::exists($directory)) {
                 File::makeDirectory($directory, 0755, true);
             }
 
-            if ($letter->pdf_path) {
-                $oldPath = public_path($letter->pdf_path);
-
-                if (File::exists($oldPath)) {
-                    File::delete($oldPath);
-                }
-            }
+            $this->deletePdf($letter->pdf_path);
+            $this->deletePdf($letter->pdf_read_path);
 
             $employeeCode = $letter->employee?->employee_code ?? 'unknown';
-            $nomorSurat = str_replace('/', '_', $letter->nomor_surat);
-            $fileName = $nomorSurat . '-' . $employeeCode . '.pdf';
 
-            $request->file('pdf')->move($directory, $fileName);
+            $nomorSurat = str_replace(
+                '/',
+                '_',
+                $letter->nomor_surat
+            );
+
+            $fileName = $nomorSurat . '-' . $employeeCode . '.pdf';
+            $readFileName = $nomorSurat . '-' . $employeeCode . '-read.pdf';
+
+            $request->file('pdf')->move(
+                $directory,
+                $fileName
+            );
+
+            $request->file('pdf_read')->move(
+                $directory,
+                $readFileName
+            );
 
             $letter->update([
                 'pdf_path' => 'surat/' . $fileName,
+                'pdf_read_path' => 'surat/' . $readFileName,
                 'sent_at' => now(),
+                'read_at' => null,
             ]);
         });
 
         return redirect()
             ->route('letter.index')
-            ->with('success', 'Surat berhasil dikirim dan PDF berhasil disimpan.');
+            ->with(
+                'success',
+                'Surat berhasil dikirim dan PDF berhasil disimpan.'
+            );
     }
 
     public function pdf(Letter $letter)
@@ -220,7 +239,21 @@ class LetterController extends Controller
                     ->translatedFormat('d F Y'),
                 'alasan_surat' => $letter->alasan_surat,
                 'name_office' => $letter->employee?->office?->name,
+                'read_at' => $letter->read_at?->toISOString(),
             ],
         ]);
+    }
+
+    private function deletePdf(?string $path): void
+    {
+        if (! $path) {
+            return;
+        }
+
+        $fullPath = public_path($path);
+
+        if (File::exists($fullPath)) {
+            File::delete($fullPath);
+        }
     }
 }

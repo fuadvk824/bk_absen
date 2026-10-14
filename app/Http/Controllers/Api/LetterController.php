@@ -44,24 +44,17 @@ class LetterController extends Controller
     {
         $user = $request->user();
 
-        $employee = Employee::query()
-            ->where('user_id', $user->id)
-            ->first();
+        $employee = Employee::where('user_id', $user->id)->firstOrFail();
 
-        if (! $employee) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Employee not found',
-            ], 404);
-        }
-
+        // Pastikan surat memang milik employee yang sedang login
         if ($letter->employee_id !== $employee->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Surat tidak ditemukan',
-            ], 404);
+                'message' => 'Anda tidak memiliki akses ke surat ini.',
+            ], 403);
         }
 
+        // Tandai sudah dibaca
         if (is_null($letter->read_at)) {
             $letter->update([
                 'read_at' => now(),
@@ -71,7 +64,14 @@ class LetterController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Surat berhasil ditandai sudah dibaca',
+
+            // PDF versi checkbox tercentang
+            'pdf_url' => $letter->pdf_read_path
+                ? asset($letter->pdf_read_path)
+                : null,
+
+            'read_at' => $letter->read_at?->toISOString(),
+            'is_read' => true,
         ]);
     }
-
 }

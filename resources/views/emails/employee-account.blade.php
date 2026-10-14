@@ -43,7 +43,7 @@
                                 </tr>
                             </table>
 
-                            <p style="margin-top:16px;">
+                            <p style="margin-top:16px;text-align:justify;">
                                 Setelah anda berhasil login untuk pertama kali, demi kemanan akun silahkan untuk melakukan penggantian password yang sesuai.
                             </p>
 
@@ -73,14 +73,14 @@
                                 <strong>Untuk Android:</strong>
                             </p>
 
-                            <ol style="padding-left:20px;margin-top:8px;">
+                            <ol style="padding-left:20px;margin-top:8px;text-align:justify;">
                                 <li style="margin-bottom:8px;">
                                     Bagi yang sudah pernah menginstall aplikasi BK Absensi sebelumnya,
                                     silakan uninstall aplikasi tersebut terlebih dahulu.
                                 </li>
                                 <li style="margin-bottom:8px;">
                                     Install aplikasi <strong>BISA ABSEN</strong>
-                                    (<strong>bisa-absen-v1.0.0.apk</strong>).
+                                    (<strong>bisa-absen-v1.0.2.apk</strong>).
                                 </li>
                                 <li style="margin-bottom:8px;">
                                     Untuk pengguna iPhone, aplikasi dapat digunakan melalui web PWA.
@@ -91,7 +91,7 @@
                                 <strong>Untuk iPhone:</strong>
                             </p>
 
-                            <ol style="padding-left:20px;margin-top:8px;">
+                            <ol style="padding-left:20px;margin-top:8px;text-align:justify;">
                                 <li style="margin-bottom:8px;">
                                     Klik link BISA ABSEN yang terdapat di email ini,
                                     atau copy link tersebut dan buka menggunakan <strong>Safari</strong>.
@@ -122,7 +122,7 @@
 
                             <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
 
-                            <p style="font-size:13px;color:#666;">
+                            <p style="font-size:13px;color:#666;text-align:justify;">
                                 Anda menerima email ini karena Admin / HRD dari
                                 <strong>BISA KULAK</strong> telah menambahkan Anda ke aplikasi BK Absensi
                             </p>

@@ -27,7 +27,8 @@ class AttendanceController extends Controller
                 'employee.shift:id,name_shift',
             ])
 
-             ->orderBy('tanggal', 'desc')
+            ->orderByDesc('tanggal')
+            ->orderByDesc('check_in')
             ->paginate($perPage)
             ->withQueryString();
 

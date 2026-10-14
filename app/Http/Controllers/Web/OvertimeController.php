@@ -30,8 +30,8 @@ class OvertimeController extends Controller
                 'status' => $request->status,
                 'perPage' => $perPage,
             ],
-            'departments' => Department::select('id', 'name')->get(),
-            'offices' => Office::select('id', 'name')->get(),
+            'departments' => Department::select(['id', 'name'])->get(),
+            'offices' => Office::select(['id', 'name'])->get(),
         ]);
     }
 
@@ -50,7 +50,7 @@ class OvertimeController extends Controller
         return back()->with(
             'success',
             "Status overtime berhasil di {$status}"
-        );
+        ); 
     }
 
     public function export(Request $request)

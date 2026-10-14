@@ -25,4 +25,9 @@ class WorkScheduleDay extends Model
     {
         return $this->belongsTo(Shift::class);
     }
+
+    public function offdayRequests()
+    {
+        return $this->hasMany(OffdayRequest::class);
+    }
 }

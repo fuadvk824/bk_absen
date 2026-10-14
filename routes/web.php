@@ -5,11 +5,14 @@ use App\Http\Controllers\Web\AssignLeaveController;
 use App\Http\Controllers\Web\AssignShiftController;
 use App\Http\Controllers\Web\AttendanceController;
 use App\Http\Controllers\Web\DepartmentController;
+use App\Http\Controllers\Web\EasterEggViewController;
+use App\Http\Controllers\Web\EmployeeBroadcastController;
 use App\Http\Controllers\Web\EmployeeController;
 use App\Http\Controllers\Web\ExportController;
 use App\Http\Controllers\Web\LeaveController;
 use App\Http\Controllers\Web\LeaveSubmitController;
 use App\Http\Controllers\Web\LetterController;
+use App\Http\Controllers\Web\OffdayRequestController;
 use App\Http\Controllers\Web\OfficeController;
 use App\Http\Controllers\Web\OvertimeController;
 use App\Http\Controllers\Web\OvertimeRateController;
@@ -164,32 +167,15 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             Route::get('/', [LeaveSubmitController::class, 'index'])->name('index');
             Route::patch('/{leavesubmit}/status', [LeaveSubmitController::class, 'updateStatus'])->name('updateStatus');
         });
-    // Route::prefix('payroll')
-    //     ->name('payroll.')
-    //     ->group(function () {
-    //         Route::get('/', [PayrollController::class, 'index'])->name('index');
-    //         Route::post('/generate', [PayrollController::class, 'generate'])->name('generate');
-    //         Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
-    //         Route::patch('/payroll/{payroll}/lock', [PayrollController::class, 'lock'])->name('lock');
-    //         // Route::get('/{id}/download', [PayrollController::class, 'downloadPdf'])->name('downloadPdf');
-    //         Route::get('/{id}/download', [PayrollController::class, 'downloadPdf'])->name('download');
-    //     });
+
     Route::prefix('payroll')
         ->name('payroll.')
         ->group(function () {
             Route::get('/', [PayrollController::class, 'index'])->name('index');
-
-            Route::post('/generate', [PayrollController::class, 'generate'])
-                ->name('generate');
-
-            Route::get('/{payroll}', [PayrollController::class, 'show'])
-                ->name('show');
-
-            Route::patch('/{payroll}/lock', [PayrollController::class, 'lock'])
-                ->name('lock');
-
-            Route::get('/{payroll}/pdf', [PayrollController::class, 'pdf'])
-                ->name('pdf');
+            Route::post('/generate', [PayrollController::class, 'generate'])->name('generate');
+            Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
+            Route::patch('/{payroll}/lock', [PayrollController::class, 'lock'])->name('lock');
+            Route::get('/{payroll}/pdf', [PayrollController::class, 'pdf'])->name('pdf');
         });
 
     Route::prefix('salary')
@@ -233,6 +219,38 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
                 ->name('pdf.download');
             Route::post('/{letter}/send', [LetterController::class, 'send'])
                 ->name('send');
+        });
+
+    Route::prefix('offday')
+        ->name('offday.')
+        ->controller(OffdayRequestController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::patch('/status-kelompok', 'updateGroupStatus')
+                ->name('updateGroupStatus');
+            Route::patch(
+                '/bulk-status',
+                [OffdayRequestController::class, 'updateBulkGroupStatus']
+            )->name('updateBulkGroupStatus');
+        });
+
+
+
+    Route::middleware(['auth', 'role:super-admin'])
+        ->group(function () {
+            Route::get(
+                '/easter-egg-views',
+                [EasterEggViewController::class, 'index']
+            )->name('easter-egg-view.index');
+            Route::get(
+                '/broadcast',
+                [EmployeeBroadcastController::class, 'index']
+            )->name('employee.broadcast.index');
+
+            Route::post(
+                '/broadcast',
+                [EmployeeBroadcastController::class, 'send']
+            )->name('employee.broadcast.send');
         });
 
     Route::get('/employee/export', [EmployeeController::class, 'export'])->name('employee.export');

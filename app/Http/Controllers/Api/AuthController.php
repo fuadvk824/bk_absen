@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\EasterEggView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,26 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
+        ]);
+    }
+
+    public function viewed(Request $request)
+    {
+        $user = $request->user();
+
+        EasterEggView::firstOrCreate(
+            [
+                'user_id' => $user->id,
+                'app_version' => $request->app_version,
+            ],
+            [
+                'viewed_at' => now(),
+                'platform' => $request->platform,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
         ]);
     }
 

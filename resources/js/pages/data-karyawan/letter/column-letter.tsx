@@ -71,11 +71,16 @@ const SendLetterButton = ({ letter }: { letter: Letter }) => {
                 import('./letter-document'),
             ]);
 
-            const blob = await pdf(<LetterDocument letter={letter} />).toBlob();
+            const [unreadBlob, readBlob] = await Promise.all([
+                pdf(<LetterDocument letter={letter} isRead={false} />).toBlob(),
+
+                pdf(<LetterDocument letter={letter} isRead={true} />).toBlob(),
+            ]);
             const formData = new FormData();
             const nomorSurat = letter.nomor_surat.replace(/\//g, '_');
 
-            formData.append('pdf', blob, `${nomorSurat}-${letter.employee_code}.pdf`);
+            formData.append('pdf', unreadBlob, `${nomorSurat}-${letter.employee_code}.pdf`);
+            formData.append('pdf_read', readBlob, `${nomorSurat}-${letter.employee_code}-read.pdf`);
 
             router.post(
                 route('letter.send', {

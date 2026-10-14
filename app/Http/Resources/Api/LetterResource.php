@@ -26,9 +26,11 @@ class LetterResource extends JsonResource
             'tanggal_surat' => $this->tanggal_surat?->format('Y-m-d'),
             'alasan_surat' => $this->alasan_surat,
 
-            'pdf_url' => $this->pdf_path
-                ? asset($this->pdf_path)
-                : null,
+            'pdf_url' => $this->read_at && $this->pdf_read_path
+                ? asset($this->pdf_read_path)
+                : ($this->pdf_path
+                    ? asset($this->pdf_path)
+                    : null),
 
             'sent_at' => $this->sent_at?->toISOString(),
             'read_at' => $this->read_at?->toISOString(),

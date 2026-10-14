@@ -89,7 +89,7 @@ class PayrollController extends Controller
             'payroll' => new PayrollResource($payroll),
         ]);
     }
-      public function pdf(Payroll $payroll)
+    public function pdf(Payroll $payroll)
     {
         $payroll->load([
             'employee.department',

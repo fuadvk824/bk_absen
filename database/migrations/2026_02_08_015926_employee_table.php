@@ -16,13 +16,9 @@ return new class extends Migration {
             $table->string('name')->index();
 
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
-
             $table->foreignId('office_id')->nullable()->constrained()->nullOnDelete();
-
             $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
-
             $table->foreignId('position_id')->nullable()->constrained()->nullOnDelete();
-
             $table->foreignId('shift_id')->nullable()->constrained()->nullOnDelete();
 
             $table->date('tanggal_awal_kerja')->nullable();
