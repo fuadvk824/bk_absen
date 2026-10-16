@@ -11,6 +11,7 @@ use App\Models\Office;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 class LeaveSubmitController extends Controller
 {
@@ -31,6 +32,43 @@ class LeaveSubmitController extends Controller
 
             'offices' => Office::select('id', 'name')->get(),
             'leaveCategories' => LeaveCategory::select('id', 'leave_name')->get(),
+        ]);
+    }
+
+    public function showFile(Leave $leavesubmit)
+    {
+        abort_if(
+            !$leavesubmit->file,
+            404,
+            'File pengajuan cuti tidak ditemukan.'
+        );
+
+        // Mendukung URL lengkap yang saat ini tersimpan di database.
+        $path = parse_url($leavesubmit->file, PHP_URL_PATH);
+
+        $prefix = '/storage/';
+
+        abort_unless(
+            $path && str_starts_with($path, $prefix),
+            404,
+            'Path file tidak valid.'
+        );
+
+        $relativePath = substr($path, strlen($prefix));
+
+        abort_unless(
+            Storage::disk('public')->exists($relativePath),
+            404,
+            'File tidak ditemukan di penyimpanan.'
+        );
+
+        return Inertia::render('pengajuan/cuti/file', [
+            'leave' => [
+                'id' => $leavesubmit->id,
+                'employee_name' => $leavesubmit->employee?->name,
+                'file_url' => asset('storage/' . $relativePath),
+                'file_name' => basename($relativePath),
+            ],
         ]);
     }
 

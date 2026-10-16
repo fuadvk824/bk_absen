@@ -167,6 +167,8 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
         ->group(function () {
             Route::get('/', [LeaveSubmitController::class, 'index'])->name('index');
             Route::patch('/{leavesubmit}/status', [LeaveSubmitController::class, 'updateStatus'])->name('updateStatus');
+            Route::get('/{leavesubmit}/file', [LeaveSubmitController::class, 'showFile'])
+                ->name('file');
         });
 
     Route::prefix('payroll')
@@ -278,4 +280,3 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
 });
 
 require __DIR__ . '/settings.php';
-

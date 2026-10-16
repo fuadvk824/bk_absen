@@ -367,7 +367,6 @@ export default function Index({
             <Head title="Pengajuan Libur" />
 
             <div className="space-y-4 p-5">
-                {/* Header */}
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                     <div className="flex flex-col gap-1">
                         <h1 className="text-lg font-semibold sm:text-xl">
@@ -451,7 +450,6 @@ export default function Index({
                     </div>
                 </div>
 
-                {/* Filter */}
                 <div className="grid grid-cols-1 gap-3 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <div className="space-y-1">
                         <Label className="text-[11px]">
@@ -673,7 +671,6 @@ export default function Index({
                     </div>
                 </div>
 
-                {/* Tabel */}
                 <DataTable<OffdayList>
                     columns={columns}
                     data={offdayRequests.data}
@@ -690,7 +687,6 @@ export default function Index({
                     }
                 />
 
-                {/* Dialog konfirmasi bulk action */}
                 <AlertDialog
                     open={bulkStatus !== null}
                     onOpenChange={(open) => {

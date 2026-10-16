@@ -24,7 +24,6 @@ class AssignBpjsController extends Controller
             $status = 'all';
         }
 
-        // Salary terbaru berdasarkan ID untuk setiap karyawan.
         $latestSalaryId = Salary::query()
             ->select('id')
             ->whereColumn('employee_id', 'employees.id')
@@ -44,12 +43,10 @@ class AssignBpjsController extends Controller
                 'latest_bpjs' => $latestBpjs,
             ])
 
-            // Filter office.
             ->when($request->filled('office_id'), function ($q) use ($request) {
                 $q->where('employees.office_id', $request->office_id);
             })
 
-            // Filter nama.
             ->when($request->filled('name'), function ($q) use ($request) {
                 $q->where(
                     'employees.name',
@@ -58,7 +55,6 @@ class AssignBpjsController extends Controller
                 );
             })
 
-            // Filter masa kerja.
             ->when($request->filled('masa_kerja'), function ($q) use ($request) {
                 $months = (int) $request->masa_kerja;
 
@@ -70,7 +66,6 @@ class AssignBpjsController extends Controller
                     );
             })
 
-            // Filter status BPJS berdasarkan salary terbaru.
             ->when($status === 'assigned', function ($q) use ($latestSalaryId) {
                 $q->whereIn('employees.id', function ($subQuery) {
                     $subQuery->select('s.employee_id')
@@ -89,13 +84,11 @@ class AssignBpjsController extends Controller
 
             ->when($status === 'unassigned', function ($q) {
                 $q->where(function ($subQuery) {
-                    // Belum mempunyai data salary.
                     $subQuery->whereNotIn('employees.id', function ($salaryQuery) {
                         $salaryQuery->select('employee_id')
                             ->from('salaries');
                     })
 
-                        // Atau BPJS salary terbaru NULL / 0 / negatif.
                         ->orWhereIn('employees.id', function ($salaryQuery) {
                             $salaryQuery->select('s.employee_id')
                                 ->from('salaries as s')
@@ -178,7 +171,6 @@ class AssignBpjsController extends Controller
                     continue;
                 }
 
-                // Cari salary terakhir yang sudah ada.
                 $salary = Salary::where('employee_id', $employee->id)
                     ->orderByDesc('id')
                     ->first();
@@ -195,7 +187,6 @@ class AssignBpjsController extends Controller
                     continue;
                 }
 
-                // Hanya update baris yang sudah ada.
                 $salary->update([
                     'bpjs' => $salary->daily_salary,
                 ]);

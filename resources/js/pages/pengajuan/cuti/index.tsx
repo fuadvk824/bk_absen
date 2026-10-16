@@ -51,7 +51,7 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const allColumns = ['employee_name', 'leave_category', 'start_date', 'end_date', 'total_days', 'status'];
+    const allColumns = ['employee_name', 'leave_category', 'start_date', 'end_date', 'total_days', 'file', 'status'];
 
     const [localFilters, setLocalFilters] = useState({
         search: filters.search ?? '',

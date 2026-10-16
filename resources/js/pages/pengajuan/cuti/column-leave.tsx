@@ -20,7 +20,7 @@ import { router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { CheckCheck, MoreHorizontal, X } from 'lucide-react';
+import { CheckCheck, ExternalLink, FileText, MoreHorizontal, X } from 'lucide-react';
 import { LeaveSubmitList } from '@/types/pengajuan/leavesubmitList';
 
 const updateStatus = (id: number, status: string) => {
@@ -76,6 +76,7 @@ export const columnLeave: ColumnDef<LeaveSubmitList>[] = [
         accessorKey: 'leave_category',
         header: 'Kategori',
     },
+
     {
         accessorKey: 'start_date',
         header: 'Mulai',
@@ -130,6 +131,24 @@ export const columnLeave: ColumnDef<LeaveSubmitList>[] = [
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            className="cursor-pointer"
+                            disabled={!leavesubmit.file}
+                            onSelect={() => {
+                                setOpen(false);
+
+                                router.get(
+                                    route('leavesubmit.file', {
+                                        leavesubmit: leavesubmit.id,
+                                    }),
+                                );
+                            }}
+                        >
+                            <FileText className="h-4 w-4" />
+                            Lihat File
+                            <ExternalLink className="ml-auto h-3 w-3" />
+                        </DropdownMenuItem>
+
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem
