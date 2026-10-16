@@ -192,8 +192,8 @@ export const columnOffday = ({
 
             return (
                 <div className="flex flex-col">
-                    <span>{`${day}-${month}-${year}`}</span>
-                    <span>{time}</span>
+                    <span className='text-xs font-medium'>{time}</span>
+                    <span className='text-xs text-muted-foreground'>{`${day}-${month}-${year}`}</span>
                 </div>
             );
         },

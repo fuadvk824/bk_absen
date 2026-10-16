@@ -15,82 +15,125 @@ use Inertia\Inertia;
 
 class AssignBpjsController extends Controller
 {
-   public function edit(Request $request)
-{
-    $perPage = $request->integer('perPage', 10);
-    $status = $request->input('status', 'all');
+    public function edit(Request $request)
+    {
+        $perPage = $request->integer('perPage', 10);
+        $status = $request->input('status', 'all');
 
-    if (!in_array($status, ['all', 'assigned', 'unassigned'], true)) {
-        $status = 'all';
-    }
+        if (!in_array($status, ['all', 'assigned', 'unassigned'], true)) {
+            $status = 'all';
+        }
 
-    $latestSalaryId = Salary::query()
-        ->select('id')
-        ->whereColumn('employee_id', 'employees.id')
-        ->orderByDesc('id')
-        ->limit(1);
+        // Salary terbaru berdasarkan ID untuk setiap karyawan.
+        $latestSalaryId = Salary::query()
+            ->select('id')
+            ->whereColumn('employee_id', 'employees.id')
+            ->orderByDesc('id')
+            ->limit(1);
 
-    $latestBpjs = Salary::query()
-        ->select('bpjs')
-        ->whereColumn('employee_id', 'employees.id')
-        ->orderByDesc('id')
-        ->limit(1);
+        $latestBpjs = Salary::query()
+            ->select('bpjs')
+            ->whereColumn('employee_id', 'employees.id')
+            ->orderByDesc('id')
+            ->limit(1);
 
-    $employees = Employee::query()
-        ->with('office:id,name')
-        ->addSelect([
-            'latest_salary_id' => $latestSalaryId,
-            'latest_bpjs' => $latestBpjs,
-        ])
-        ->when($request->filled('office_id'), function ($q) use ($request) {
-            $q->where('employees.office_id', $request->office_id);
-        })
-        ->when($request->filled('name'), function ($q) use ($request) {
-            $q->where(
-                'employees.name',
-                'like',
-                '%' . $request->name . '%'
-            );
-        })
-        ->when($request->filled('masa_kerja'), function ($q) use ($request) {
-            $months = (int) $request->masa_kerja;
+        $employees = Employee::query()
+            ->with('office:id,name')
+            ->addSelect([
+                'latest_salary_id' => $latestSalaryId,
+                'latest_bpjs' => $latestBpjs,
+            ])
 
-            $q->whereNotNull('employees.tanggal_awal_kerja')
-                ->whereDate(
-                    'employees.tanggal_awal_kerja',
-                    '<=',
-                    now()->subMonths($months)->toDateString()
+            // Filter office.
+            ->when($request->filled('office_id'), function ($q) use ($request) {
+                $q->where('employees.office_id', $request->office_id);
+            })
+
+            // Filter nama.
+            ->when($request->filled('name'), function ($q) use ($request) {
+                $q->where(
+                    'employees.name',
+                    'like',
+                    '%' . $request->name . '%'
                 );
-        })
-        ->when($status === 'assigned', function ($q) {
-            $q->where('latest_bpjs', '>', 0);
-        })
-        ->when($status === 'unassigned', function ($q) {
-            $q->where(function ($subQuery) {
-                $subQuery->whereNull('latest_bpjs')
-                    ->orWhere('latest_bpjs', '<=', 0);
-            });
-        })
-        ->orderBy('employees.name')
-        ->paginate($perPage)
-        ->withQueryString();
+            })
 
-    return Inertia::render('payroll/bpjs/assignBpjs', [
-        'employees' => AssignBpjsResource::collection($employees)
-            ->response()
-            ->getData(true),
+            // Filter masa kerja.
+            ->when($request->filled('masa_kerja'), function ($q) use ($request) {
+                $months = (int) $request->masa_kerja;
 
-        'offices' => Office::select('id', 'name')->get(),
+                $q->whereNotNull('employees.tanggal_awal_kerja')
+                    ->whereDate(
+                        'employees.tanggal_awal_kerja',
+                        '<=',
+                        now()->subMonths($months)->toDateString()
+                    );
+            })
 
-        'filters' => [
-            'office_id' => $request->office_id,
-            'name' => $request->name,
-            'masa_kerja' => $request->masa_kerja,
-            'status' => $status,
-            'perPage' => $perPage,
-        ],
-    ]);
-}
+            // Filter status BPJS berdasarkan salary terbaru.
+            ->when($status === 'assigned', function ($q) use ($latestSalaryId) {
+                $q->whereIn('employees.id', function ($subQuery) {
+                    $subQuery->select('s.employee_id')
+                        ->from('salaries as s')
+                        ->whereRaw('s.id = (
+                        SELECT s2.id
+                        FROM salaries AS s2
+                        WHERE s2.employee_id = s.employee_id
+                        ORDER BY s2.id DESC
+                        LIMIT 1
+                    )')
+                        ->whereNotNull('s.bpjs')
+                        ->where('s.bpjs', '>', 0);
+                });
+            })
+
+            ->when($status === 'unassigned', function ($q) {
+                $q->where(function ($subQuery) {
+                    // Belum mempunyai data salary.
+                    $subQuery->whereNotIn('employees.id', function ($salaryQuery) {
+                        $salaryQuery->select('employee_id')
+                            ->from('salaries');
+                    })
+
+                        // Atau BPJS salary terbaru NULL / 0 / negatif.
+                        ->orWhereIn('employees.id', function ($salaryQuery) {
+                            $salaryQuery->select('s.employee_id')
+                                ->from('salaries as s')
+                                ->whereRaw('s.id = (
+                            SELECT s2.id
+                            FROM salaries AS s2
+                            WHERE s2.employee_id = s.employee_id
+                            ORDER BY s2.id DESC
+                            LIMIT 1
+                        )')
+                                ->where(function ($bpjsQuery) {
+                                    $bpjsQuery->whereNull('s.bpjs')
+                                        ->orWhere('s.bpjs', '<=', 0);
+                                });
+                        });
+                });
+            })
+
+            ->orderBy('employees.name')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return Inertia::render('payroll/bpjs/assignBpjs', [
+            'employees' => AssignBpjsResource::collection($employees)
+                ->response()
+                ->getData(true),
+
+            'offices' => Office::select('id', 'name')->get(),
+
+            'filters' => [
+                'office_id' => $request->office_id,
+                'name' => $request->name,
+                'masa_kerja' => $request->masa_kerja,
+                'status' => $status,
+                'perPage' => $perPage,
+            ],
+        ]);
+    }
 
 
     public function patch(Request $request)

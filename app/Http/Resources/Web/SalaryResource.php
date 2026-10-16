@@ -19,6 +19,7 @@ class SalaryResource extends JsonResource
             'employee_id' => $this->employee_id,
             'employee_name' => $this->employee?->name,
             // 'basic_salary' => $this->basic_salary,
+            'bpjs' => $this->bpjs,
             'daily_salary' => $this->daily_salary,
             'effective_from' => $this->effective_from?->format('d-m-Y'),
         ];
