@@ -19,7 +19,7 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->index();
 
-            $table->decimal('basic_salary', 15, 2)->nullable();
+            $table->decimal('basic_salary', 15, 2)->nullable();//diganti bpjs
             $table->decimal('daily_salary', 15, 2)->nullable();
 
             $table->date('effective_from')->index();
@@ -28,7 +28,6 @@ return new class extends Migration {
             $table->unique(['employee_id', 'effective_from']);
         });
     }
-
     /**
      * Reverse the migrations.
      */

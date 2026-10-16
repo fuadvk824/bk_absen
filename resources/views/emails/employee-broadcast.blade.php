@@ -123,7 +123,6 @@
                                 menggunakan versi terbaru.
                             </p>
 
-
                             <p style="margin:24px 0 0;font-size:14px;
                                 line-height:1.8;color:#475569;text-align:justify;">
                                 Kami mengimbau seluruh pengguna untuk

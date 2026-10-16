@@ -64,6 +64,7 @@ class OffdayRequestResource extends JsonResource
             'period_start' => $this->period_start,
             'period_end' => $this->period_end,
 
+            'since' => $this->since,
             'request_dates' => $requestDates,
             'request_details' => $requestDetails,
             'total_requests' => (int) $this->total_requests,

@@ -49,7 +49,6 @@ class EmployeeBroadcastController extends Controller
                 'required',
                 'array',
                 'min:1',
-                'max:10',
             ],
             'employee_ids.*' => [
                 'required',

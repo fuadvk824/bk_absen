@@ -22,6 +22,10 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import type { Letter, LetterType } from '@/types/type-table/letter';
 
 const handleToast = (page: any) => {
@@ -57,65 +61,161 @@ const deleteLetter = (id: number) => {
 
 const SendLetterButton = ({ letter }: { letter: Letter }) => {
     const [loading, setLoading] = useState(false);
+    const [pdf, setPdf] = useState<File | null>(null);
+    const [pdfRead, setPdfRead] = useState<File | null>(null);
+    const [open, setOpen] = useState(false);
 
-    const handleSend = async () => {
-        if (loading) {
+    const handleSend = () => {
+        if (!pdf || !pdfRead || loading) {
+            toast.error('Pilih kedua file PDF terlebih dahulu.');
             return;
         }
 
+        const formData = new FormData();
+        formData.append('pdf', pdf);
+        formData.append('pdf_read', pdfRead);
+
         setLoading(true);
 
-        try {
-            const [{ pdf }, { LetterDocument }] = await Promise.all([
-                import('@react-pdf/renderer'),
-                import('./letter-document'),
-            ]);
+        router.post(route('letter.send', { letter: letter.id }), formData, {
+            forceFormData: true,
+            preserveScroll: true,
 
-            const [unreadBlob, readBlob] = await Promise.all([
-                pdf(<LetterDocument letter={letter} isRead={false} />).toBlob(),
+            onSuccess: (page) => {
+                handleToast(page);
+                setOpen(false);
+                setPdf(null);
+                setPdfRead(null);
+            },
 
-                pdf(<LetterDocument letter={letter} isRead={true} />).toBlob(),
-            ]);
-            const formData = new FormData();
-            const nomorSurat = letter.nomor_surat.replace(/\//g, '_');
+            onError: (errors) => {
+                if (errors.pdf) {
+                    toast.error(errors.pdf);
+                } else if (errors.pdf_read) {
+                    toast.error(errors.pdf_read);
+                } else {
+                    toast.error('Gagal mengunggah PDF surat.');
+                }
+            },
 
-            formData.append('pdf', unreadBlob, `${nomorSurat}-${letter.employee_code}.pdf`);
-            formData.append('pdf_read', readBlob, `${nomorSurat}-${letter.employee_code}-read.pdf`);
-
-            router.post(
-                route('letter.send', {
-                    letter: letter.id,
-                }),
-                formData,
-                {
-                    forceFormData: true,
-                    preserveScroll: true,
-                    onSuccess: handleToast,
-
-                    onError: () => {
-                        toast.error('Gagal mengirim surat.');
-                    },
-
-                    onFinish: () => {
-                        setLoading(false);
-                    },
-                },
-            );
-        } catch (error) {
-            toast.error('Gagal membuat PDF.');
-
-            setLoading(false);
-        }
+            onFinish: () => setLoading(false),
+        });
     };
 
     return (
-        <Button variant="outline" size="sm" className="cursor-pointer" onClick={handleSend} disabled={loading}>
-            <Mail className="mr-2 h-4 w-4" />
+        <Dialog open={open} onOpenChange={setOpen}>
+            <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
+                <Mail className="mr-2 h-4 w-4" />
+                {letter.pdf_path ? 'Upload Ulang' : 'Upload PDF'}
+            </Button>
 
-            {loading ? 'Mengirim...' : letter.pdf_path ? 'Kirim Ulang' : 'Kirim'}
-        </Button>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Upload PDF Surat</DialogTitle>
+                    <DialogDescription>
+                        Pilih PDF surat biasa dan PDF versi sudah dibaca untuk {letter.name}.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>PDF Surat Asli</Label>
+                        <Input
+                            type="file"
+                            accept="application/pdf,.pdf"
+                            onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
+                        />
+                        {pdf && <p className="text-xs text-muted-foreground">{pdf.name}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>PDF Surat dengan Tanda Centang</Label>
+                        <Input
+                            type="file"
+                            accept="application/pdf,.pdf"
+                            onChange={(e) => setPdfRead(e.target.files?.[0] ?? null)}
+                        />
+                        {pdfRead && <p className="text-xs text-muted-foreground">{pdfRead.name}</p>}
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">Format PDF, maksimal 10 MB per file.</p>
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+                        Batal
+                    </Button>
+
+                    <Button onClick={handleSend} disabled={loading || !pdf || !pdfRead}>
+                        {loading ? 'Mengunggah...' : 'Upload Surat'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
+
+// const SendLetterButton = ({ letter }: { letter: Letter }) => {
+//     const [loading, setLoading] = useState(false);
+
+//     const handleSend = async () => {
+//         if (loading) {
+//             return;
+//         }
+
+//         setLoading(true);
+
+//         try {
+//             const [{ pdf }, { LetterDocument }] = await Promise.all([
+//                 import('@react-pdf/renderer'),
+//                 import('./letter-document'),
+//             ]);
+
+//             const [unreadBlob, readBlob] = await Promise.all([
+//                 pdf(<LetterDocument letter={letter} isRead={false} />).toBlob(),
+
+//                 pdf(<LetterDocument letter={letter} isRead={true} />).toBlob(),
+//             ]);
+//             const formData = new FormData();
+//             const nomorSurat = letter.nomor_surat.replace(/\//g, '_');
+
+//             formData.append('pdf', unreadBlob, `${nomorSurat}-${letter.employee_code}.pdf`);
+//             formData.append('pdf_read', readBlob, `${nomorSurat}-${letter.employee_code}-read.pdf`);
+
+//             router.post(
+//                 route('letter.send', {
+//                     letter: letter.id,
+//                 }),
+//                 formData,
+//                 {
+//                     forceFormData: true,
+//                     preserveScroll: true,
+//                     onSuccess: handleToast,
+
+//                     onError: () => {
+//                         toast.error('Gagal mengirim surat.');
+//                     },
+
+//                     onFinish: () => {
+//                         setLoading(false);
+//                     },
+//                 },
+//             );
+//         } catch (error) {
+//             toast.error('Gagal membuat PDF.');
+
+//             setLoading(false);
+//         }
+//     };
+
+//     return (
+//         <Button variant="outline" size="sm" className="cursor-pointer" onClick={handleSend} disabled={loading}>
+//             <Mail className="mr-2 h-4 w-4" />
+
+//             {loading ? 'Mengirim...' : letter.pdf_path ? 'Kirim Ulang' : 'Kirim'}
+//         </Button>
+//     );
+// };
 
 const ActionCell = ({ letter, onEdit }: { letter: Letter; onEdit: (letter: Letter) => void }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);

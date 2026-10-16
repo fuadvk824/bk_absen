@@ -128,7 +128,7 @@ export const columnOffday = ({
 
     {
         id: 'dates',
-        header: 'Tanggal-tanggal Pengajuan',
+        header: 'Tanggal-Tanggal Libur',
 
         cell: ({ row, table }) => {
             const item = row.original;
@@ -174,6 +174,26 @@ export const columnOffday = ({
                             </span>
                         );
                     })}
+                </div>
+            );
+        },
+    },
+
+    {
+        accessorKey: 'since',
+        header: 'Tanggal Pengajuan',
+        cell: ({ row }) => {
+            const since = row.original.since;
+
+            if (!since) return '-';
+
+            const [date, time] = since.split(' ');
+            const [year, month, day] = date.split('-');
+
+            return (
+                <div className="flex flex-col">
+                    <span>{`${day}-${month}-${year}`}</span>
+                    <span>{time}</span>
                 </div>
             );
         },

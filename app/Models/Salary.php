@@ -8,7 +8,7 @@ class Salary extends Model
 {
     protected $fillable = [
         'employee_id',
-        'basic_salary',
+        'bpjs',
         'daily_salary',
         'effective_from'
     ];

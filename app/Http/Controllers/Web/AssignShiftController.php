@@ -47,7 +47,7 @@ class AssignShiftController extends Controller
         return Inertia::render('data-karyawan/shift-karyawan/assignEmployees', [
             'shift' => $shift,
             'employees' => AssignShiftResource::collection($employees)->response()->getData(true),
-            'offices' => Office::select('id', 'name')->orderBy('name')->get(),
+            'offices' => Office::select('id', 'name')->orderBy('name', 'asc')->get(),
             'currentPeriod' => $currentPeriod,
             'filters' => [
                 'office_id' => $request->office_id,

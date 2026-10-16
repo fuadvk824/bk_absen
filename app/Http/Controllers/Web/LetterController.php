@@ -163,6 +163,61 @@ class LetterController extends Controller
             );
     }
 
+    // public function send(Request $request, Letter $letter)
+    // {
+    //     $request->validate([
+    //         'pdf' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+    //         'pdf_read' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+    //     ]);
+
+    //     DB::transaction(function () use ($request, $letter) {
+    //         $directory = public_path('surat');
+
+    //         if (!File::exists($directory)) {
+    //             File::makeDirectory($directory, 0755, true);
+    //         }
+
+    //         $this->deletePdf($letter->pdf_path);
+    //         $this->deletePdf($letter->pdf_read_path);
+
+    //         $employeeCode = $letter->employee?->employee_code ?? 'unknown';
+
+    //         $nomorSurat = str_replace(
+    //             '/',
+    //             '_',
+    //             $letter->nomor_surat
+    //         );
+
+    //         $fileName = $nomorSurat . '-' . $employeeCode . '.pdf';
+    //         $readFileName = $nomorSurat . '-' . $employeeCode . '-read.pdf';
+
+    //         $request->file('pdf')->move(
+    //             $directory,
+    //             $fileName
+    //         );
+
+    //         $request->file('pdf_read')->move(
+    //             $directory,
+    //             $readFileName
+    //         );
+
+    //         $letter->update([
+    //             'pdf_path' => 'surat/' . $fileName,
+    //             'pdf_read_path' => 'surat/' . $readFileName,
+    //             'sent_at' => now(),
+    //             'read_at' => null,
+    //         ]);
+    //     });
+
+    //     return redirect()
+    //         ->route('letter.index')
+    //         ->with(
+    //             'success',
+    //             'Surat berhasil dikirim dan PDF berhasil disimpan.'
+    //         );
+    // }
+
+
     public function send(Request $request, Letter $letter)
     {
         $request->validate([
@@ -170,79 +225,115 @@ class LetterController extends Controller
             'pdf_read' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
-        DB::transaction(function () use ($request, $letter) {
-            $directory = public_path('surat');
+        $directory = public_path('surat');
+        File::ensureDirectoryExists($directory);
 
-            if (!File::exists($directory)) {
-                File::makeDirectory($directory, 0755, true);
+        $oldPdfPath = $letter->pdf_path;
+        $oldPdfReadPath = $letter->pdf_read_path;
+
+        $newFiles = [];
+
+        try {
+            // Buat nama baru agar tidak menimpa file lama.
+            $pdfName = 'surat_' . $letter->id . '_' . uniqid() . '.pdf';
+            $pdfReadName = 'surat_read_' . $letter->id . '_' . uniqid() . '.pdf';
+
+            // Simpan PDF biasa.
+            $request->file('pdf')->move($directory, $pdfName);
+            $newFiles[] = $directory . DIRECTORY_SEPARATOR . $pdfName;
+
+            // Simpan PDF versi sudah dibaca/dicentang.
+            $request->file('pdf_read')->move($directory, $pdfReadName);
+            $newFiles[] = $directory . DIRECTORY_SEPARATOR . $pdfReadName;
+
+            // Update database setelah kedua file berhasil disimpan.
+            DB::transaction(function () use ($letter, $pdfName, $pdfReadName) {
+                $letter->update([
+                    'pdf_path' => 'surat/' . $pdfName,
+                    'pdf_read_path' => 'surat/' . $pdfReadName,
+                    'sent_at' => now(),
+                    'read_at' => null,
+                ]);
+            });
+
+            // Hapus file lama hanya setelah database berhasil diperbarui.
+            foreach ([$oldPdfPath, $oldPdfReadPath] as $oldPath) {
+                if (!$oldPath) {
+                    continue;
+                }
+
+                $oldFile = public_path($oldPath);
+
+                // Jangan hapus jika path lama sama dengan file baru.
+                if (
+                    File::exists($oldFile) &&
+                    !in_array($oldFile, $newFiles, true)
+                ) {
+                    File::delete($oldFile);
+                }
             }
 
-            $this->deletePdf($letter->pdf_path);
-            $this->deletePdf($letter->pdf_read_path);
+            return back()->with('success', 'PDF surat berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            // Jika gagal, bersihkan file baru yang sempat tersimpan.
+            foreach ($newFiles as $newFile) {
+                if (File::exists($newFile)) {
+                    File::delete($newFile);
+                }
+            }
 
-            $employeeCode = $letter->employee?->employee_code ?? 'unknown';
-
-            $nomorSurat = str_replace(
-                '/',
-                '_',
-                $letter->nomor_surat
-            );
-
-            $fileName = $nomorSurat . '-' . $employeeCode . '.pdf';
-            $readFileName = $nomorSurat . '-' . $employeeCode . '-read.pdf';
-
-            $request->file('pdf')->move(
-                $directory,
-                $fileName
-            );
-
-            $request->file('pdf_read')->move(
-                $directory,
-                $readFileName
-            );
-
-            $letter->update([
-                'pdf_path' => 'surat/' . $fileName,
-                'pdf_read_path' => 'surat/' . $readFileName,
-                'sent_at' => now(),
-                'read_at' => null,
+            logger('Gagal memperbarui PDF surat', [
+                'letter_id' => $letter->id,
+                'error' => $e->getMessage(),
             ]);
-        });
 
-        return redirect()
-            ->route('letter.index')
-            ->with(
-                'success',
-                'Surat berhasil dikirim dan PDF berhasil disimpan.'
-            );
+            return back()->withErrors([
+                'pdf' => 'Gagal menyimpan PDF. Silakan periksa log Laravel.',
+            ]);
+        }
     }
+
 
     public function pdf(Letter $letter)
     {
-        $letter->load([
-            'employee:id,employee_code,position_id,office_id',
-            'employee.position:id,name',
-            'employee.office:id,name',
-        ]);
-
         return Inertia::render('data-karyawan/letter/pdf', [
             'letter' => [
                 'id' => $letter->id,
-                'employee_id' => $letter->employee_id,
-                'employee_code' => $letter->employee?->employee_code,
                 'name' => $letter->name,
-                'jabatan' => $letter->employee?->position?->name,
                 'nomor_surat' => $letter->nomor_surat,
-                'jenis_surat' => $letter->jenis_surat,
-                'tanggal_surat' => $letter->tanggal_surat
-                    ?->locale('id')
-                    ->translatedFormat('d F Y'),
-                'alasan_surat' => $letter->alasan_surat,
-                'name_office' => $letter->employee?->office?->name,
-                'read_at' => $letter->read_at?->toISOString(),
+                'pdf_url' => $letter->pdf_path
+                    ? asset($letter->pdf_path)
+                    : null,
             ],
         ]);
     }
+
+    // public function pdf(Letter $letter)
+    // {
+    //     $letter->load([
+    //         'employee:id,employee_code,position_id,office_id',
+    //         'employee.position:id,name',
+    //         'employee.office:id,name',
+    //     ]);
+
+    //     return Inertia::render('data-karyawan/letter/pdf', [
+    //         'letter' => [
+    //             'id' => $letter->id,
+    //             'employee_id' => $letter->employee_id,
+    //             'employee_code' => $letter->employee?->employee_code,
+    //             'name' => $letter->name,
+    //             'jabatan' => $letter->employee?->position?->name,
+    //             'nomor_surat' => $letter->nomor_surat,
+    //             'jenis_surat' => $letter->jenis_surat,
+    //             'tanggal_surat' => $letter->tanggal_surat
+    //                 ?->locale('id')
+    //                 ->translatedFormat('d F Y'),
+    //             'alasan_surat' => $letter->alasan_surat,
+    //             'name_office' => $letter->employee?->office?->name,
+    //             'read_at' => $letter->read_at?->toISOString(),
+    //         ],
+    //     ]);
+    // }
 
     private function deletePdf(?string $path): void
     {

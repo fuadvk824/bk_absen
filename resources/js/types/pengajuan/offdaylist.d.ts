@@ -26,6 +26,7 @@ export interface OffdayList {
 
     request_dates: string[];
     total_requests: number;
+    since: string | null;
 
     status: OffdayStatus;
     request_details: OffdayRequestDetail[];
@@ -55,25 +56,4 @@ export interface OfficeOption {
     id: number;
     name: string;
 }
-
-// export interface OffdayList {
-//     id: number;
-
-//     employee_id: number;
-//     employee_name: string;
-
-//     work_schedule_day_id: number;
-
-//     date: string;
-
-//     status_start_date: 'masuk' | 'libur';
-
-//     status_end_date: 'masuk' | 'libur';
-
-//     status: 'pending' | 'approved' | 'rejected';
-
-//     reason: string;
-
-//     created_at: string | null;
-//     updated_at: string | null;
-// }
+ 

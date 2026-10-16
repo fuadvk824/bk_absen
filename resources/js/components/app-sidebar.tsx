@@ -86,8 +86,17 @@ export function AppSidebar() {
         },
         {
             title: 'Payroll',
-            href: '/payroll',
             icon: Receipt,
+            children: [
+                {
+                    title: 'Payroll',
+                    href: '/payroll',
+                },
+                {
+                    title: 'BPJS',
+                    href: '/assign-bpjs'
+                }
+            ],
         },
         {
             title: 'Kantor',
@@ -214,3 +223,4 @@ export function AppSidebar() {
         </Sidebar>
     );
 }
+ 

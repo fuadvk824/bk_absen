@@ -95,7 +95,6 @@ class EmployeeController extends Controller
 
             Salary::create([
                 'employee_id' => $employee->id,
-                'basic_salary' => 0,
                 'daily_salary' => $validated['daily_salary'] ?? 0,
                 'effective_from' => now()->toDateString(),
             ]);

@@ -137,6 +137,9 @@ class OffdayRequestController extends Controller
             ->selectRaw(
                 'MAX(offday_requests.date) as last_request_date'
             )
+             ->selectRaw(
+                'MIN(offday_requests.since) as since'
+            )
             ->selectRaw(
                 'GROUP_CONCAT(
                     DATE_FORMAT(offday_requests.date, "%Y-%m-%d")

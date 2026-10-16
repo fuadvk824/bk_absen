@@ -10,6 +10,7 @@ class OffdayRequest extends Model
         'employee_id',
         'work_schedule_day_id',
         'date',
+        'since',
         'status_start_date',
         'status_end_date',
         'status',

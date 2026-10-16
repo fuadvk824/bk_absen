@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GoogleDriveController;
+use App\Http\Controllers\Web\AssignBpjsController;
 use App\Http\Controllers\Web\AssignLeaveController;
 use App\Http\Controllers\Web\AssignShiftController;
 use App\Http\Controllers\Web\AttendanceController;
@@ -234,7 +235,13 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             )->name('updateBulkGroupStatus');
         });
 
-
+    Route::prefix('assign-bpjs')
+        ->name('bpjsassign.')
+        ->controller(AssignBpjsController::class)
+        ->group(function () {
+            Route::get('/', 'edit')->name('edit');
+            Route::patch('/', 'patch')->name('patch');
+        });
 
     Route::middleware(['auth', 'role:super-admin'])
         ->group(function () {
@@ -271,3 +278,4 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
 });
 
 require __DIR__ . '/settings.php';
+
