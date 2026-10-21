@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import type { VisibilityState } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import AppLayout from '@/layouts/app-layout';
 
@@ -10,6 +10,7 @@ import { DataTable } from '@/components/table/datatable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -33,16 +34,21 @@ interface Props {
         id: number;
         name: string;
     }[];
+    offices: {
+        id: number;
+        name: string;
+    }[];
 
     filters: {
         search?: string;
         perPage?: number;
         min_salary?: number;
         max_salary?: number;
+        office_id?: number | string;
     };
 }
 
-export default function Index({ salaries, employees, filters }: Props) {
+export default function Index({ salaries, employees, offices, filters }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [isRefreshing, setIsRefreshing] = useState(false);
     const allColumns = ['employee_name', 'daily_salary', 'effective_from'];
@@ -51,6 +57,7 @@ export default function Index({ salaries, employees, filters }: Props) {
         search: filters.search ?? '',
         min_salary: filters.min_salary ?? '',
         max_salary: filters.max_salary ?? '',
+        office_id: filters.office_id?.toString() ?? '',
         perPage: filters.perPage ?? 10,
     });
 
@@ -61,6 +68,27 @@ export default function Index({ salaries, employees, filters }: Props) {
         allColumns,
     });
 
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleSearchChange = (value: string) => {
+        setLocalFilters((prev) => ({
+            ...prev,
+            search: value,
+        }));
+
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
+        }
+
+        if (value.trim().length < 3 && value.trim().length !== 0) {
+            return;
+        }
+
+        searchTimeout.current = setTimeout(() => {
+            handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+        }, 500);
+    };
+
     const handleResetFilters = () => {
         setIsRefreshing(true);
 
@@ -69,6 +97,7 @@ export default function Index({ salaries, employees, filters }: Props) {
             min_salary: '',
             max_salary: '',
             perPage: 10,
+            office_id: '',
         };
 
         setLocalFilters(defaultFilters);
@@ -84,7 +113,6 @@ export default function Index({ salaries, employees, filters }: Props) {
         );
     };
 
-
     const [open, setOpen] = useState(false);
     const [selectedSalary, setSelectedSalary] = useState<SalaryList | null>(null);
 
@@ -97,7 +125,6 @@ export default function Index({ salaries, employees, filters }: Props) {
         setSelectedSalary(salary);
         setOpen(true);
     };
-
 
     return (
         <AppLayout
@@ -117,7 +144,7 @@ export default function Index({ salaries, employees, filters }: Props) {
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                             <span className="hidden sm:block">Refresh</span>
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
 
                         <Button
@@ -141,11 +168,35 @@ export default function Index({ salaries, employees, filters }: Props) {
                         <Label>Nama Karyawan</Label>
 
                         <Input
-                            placeholder="Cari nama karyawan..."
+                            placeholder="Cari nama karyawan (min. 3 huruf)..."
                             value={localFilters.search}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-8 placeholder:text-xs"
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            className="h-7 p-4 placeholder:text-xs"
                         />
+                    </div>
+                    <div className="space-y-1">
+                        <Label>Kantor</Label>
+
+                        <Select
+                            value={localFilters.office_id || 'all'}
+                            onValueChange={(value) =>
+                                handleFilterChange(localFilters, setLocalFilters, 'office_id', value === 'all' ? '' : value)
+                            }
+                        >
+                            <SelectTrigger className="h-8 w-full">
+                                <SelectValue placeholder="Semua Office" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                <SelectItem value="all">Semua Office</SelectItem>
+
+                                {offices.map((office) => (
+                                    <SelectItem key={office.id} value={String(office.id)}>
+                                        {office.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="space-y-1">

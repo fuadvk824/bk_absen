@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\SalaryRequest;
 use App\Http\Resources\Web\SalaryResource;
 use App\Models\Employee;
+use App\Models\Office;
 use App\Models\Salary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,21 +14,27 @@ use Inertia\Inertia;
 
 class SalaryController extends Controller
 {
+
     public function index(Request $request)
     {
         $perPage = $request->get('perPage', 10);
 
         $salaries = Salary::query()
-            ->with('employee')
+            ->with(['employee.office'])
             ->when($request->search, function ($q) use ($request) {
                 $q->whereHas('employee', function ($emp) use ($request) {
                     $emp->where('name', 'like', '%' . $request->search . '%');
                 });
             })
-            ->when($request->min_salary, function ($q) use ($request) {
+            ->when($request->filled('office_id'), function ($q) use ($request) {
+                $q->whereHas('employee', function ($emp) use ($request) {
+                    $emp->where('office_id', $request->office_id);
+                });
+            })
+            ->when($request->filled('min_salary'), function ($q) use ($request) {
                 $q->where('daily_salary', '>=', $request->min_salary);
             })
-            ->when($request->max_salary, function ($q) use ($request) {
+            ->when($request->filled('max_salary'), function ($q) use ($request) {
                 $q->where('daily_salary', '<=', $request->max_salary);
             })
             ->latest()
@@ -35,12 +42,14 @@ class SalaryController extends Controller
             ->withQueryString();
 
         return Inertia::render('kategori/gaji/index', [
-            'salaries' => SalaryResource::collection($salaries)->response()->getData(true),
+            'salaries' => SalaryResource::collection($salaries)
+                ->response()
+                ->getData(true),
 
             'employees' => Employee::query()
                 ->whereDoesntHave('salaries')
                 ->orWhere(function ($q) use ($request) {
-                    if ($request->salary_id) {
+                    if ($request->filled('salary_id')) {
                         $salary = Salary::find($request->salary_id);
 
                         if ($salary) {
@@ -52,11 +61,17 @@ class SalaryController extends Controller
                 ->orderBy('name')
                 ->get(),
 
+            'offices' => Office::query()
+                ->select('id', 'name')
+                ->orderBy('name', 'asc')
+                ->get(),
+
             'filters' => [
                 'search' => $request->search,
                 'perPage' => $perPage,
                 'min_salary' => $request->min_salary,
                 'max_salary' => $request->max_salary,
+                'office_id' => $request->office_id,
             ],
         ]);
     }

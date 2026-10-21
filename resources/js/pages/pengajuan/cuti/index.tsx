@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import type { VisibilityState } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 import { DataTable } from '@/components/table/datatable';
@@ -70,6 +70,27 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
         allColumns,
     });
 
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleSearchChange = (value: string) => {
+        setLocalFilters((prev) => ({
+            ...prev,
+            search: value,
+        }));
+
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
+        }
+
+        if (value.trim().length < 3 && value.trim().length !== 0) {
+            return;
+        }
+
+        searchTimeout.current = setTimeout(() => {
+            handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+        }, 500);
+    };
+
     const handleResetFilters = () => {
         setIsRefreshing(true);
         const defaultFilters = {
@@ -118,9 +139,9 @@ export default function Index({ leaves, filters, offices, leaveCategories }: Pro
                     <div className="space-y-1">
                         <Label>Nama Karyawan</Label>
                         <Input
-                            placeholder="Cari..."
+                            placeholder="Cari nama karyawan (min. 3 huruf)..."
                             value={localFilters.search}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                             className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>

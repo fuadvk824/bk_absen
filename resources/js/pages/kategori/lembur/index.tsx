@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import type { VisibilityState } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { DataTable } from '@/components/table/datatable';
 import { Button } from '@/components/ui/button';
@@ -34,9 +34,7 @@ interface Props {
 
 export default function Index({ overtimeRates, filters }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-
     const [isRefreshing, setIsRefreshing] = useState(false);
-
     const allColumns = ['name', 'rate_per_hour', 'effective_from', 'is_active'];
 
     const [localFilters, setLocalFilters] = useState({
@@ -46,10 +44,31 @@ export default function Index({ overtimeRates, filters }: Props) {
 
     const { handleFilterChange, handleExport } = useTableActions({
         filters: localFilters,
-        indexRoute: 'overtime-rate.index',
-        exportRoute: 'overtime-rate.export',
+        indexRoute: 'kategori-lembur.index',
+        exportRoute: 'kategori-lembur.export',
         allColumns,
     });
+
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    
+        const handleSearchChange = (value: string) => {
+            setLocalFilters((prev) => ({
+                ...prev,
+                search: value,
+            }));
+    
+            if (searchTimeout.current) {
+                clearTimeout(searchTimeout.current);
+            }
+    
+            if (value.trim().length < 3 && value.trim().length !== 0) {
+                return;
+            }
+    
+            searchTimeout.current = setTimeout(() => {
+                handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+            }, 500);
+        };
 
     const handleResetFilters = () => {
         setIsRefreshing(true);
@@ -62,7 +81,7 @@ export default function Index({ overtimeRates, filters }: Props) {
         setLocalFilters(defaultFilters);
 
         router.get(
-            route('overtime-rate.index'),
+            route('kategori-lembur.index'),
             {},
             {
                 replace: true,
@@ -90,7 +109,7 @@ export default function Index({ overtimeRates, filters }: Props) {
             breadcrumbs={[
                 {
                     title: 'Bonus Lembur',
-                    href: route('overtime-rate.index'),
+                    href: route('kategori-lembur.index'),
                 },
             ]}
         >
@@ -129,9 +148,9 @@ export default function Index({ overtimeRates, filters }: Props) {
                         <Label className="text-[11px]">Nama Bonus Lembur</Label>
 
                         <Input
-                            placeholder="Cari nama lembur..."
+                            placeholder="Cari nama lembur (min. 3 huruf)..."
                             value={localFilters.search}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                             className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>

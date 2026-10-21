@@ -17,6 +17,9 @@ class OffdayRequestController extends Controller
 {
     public function index(Request $request)
     {
+        $perPage = (int) $request->input('perPage', 10);
+        $perPage = max(1, min(100, $perPage));
+
         $today = Carbon::today();
 
         $defaultPeriodStart = $today->copy()
@@ -41,15 +44,41 @@ class OffdayRequestController extends Controller
             ->endOfDay();
 
 
+        // $search = trim((string) $request->input('search', ''));
+        // $status = $request->input('status', '');
+
+        // $officeId = $request->input('office_id', '');
+        // $departmentId = $request->input('department_id', '');
+        // $positionId = $request->input('position_id', '');
         $search = trim((string) $request->input('search', ''));
-        $status = $request->input('status', '');
 
-        $officeId = $request->input('office_id', '');
-        $departmentId = $request->input('department_id', '');
-        $positionId = $request->input('position_id', '');
+        $status = $request->input('status');
+        $officeId = $request->input('office_id');
+        $departmentId = $request->input('department_id');
+        $positionId = $request->input('position_id');
 
-        $perPage = (int) $request->input('perPage', 10);
-        $perPage = max(1, min(100, $perPage));
+        $normalizeFilterId = static function ($value): ?int {
+            if (
+                $value === null ||
+                $value === '' ||
+                $value === 'all'
+            ) {
+                return null;
+            }
+
+            $id = filter_var($value, FILTER_VALIDATE_INT);
+
+            return $id !== false && $id > 0 ? $id : null;
+        };
+
+        $officeId = $normalizeFilterId($officeId);
+        $departmentId = $normalizeFilterId($departmentId);
+        $positionId = $normalizeFilterId($positionId);
+
+        if (!in_array($status, ['pending', 'approved', 'rejected'], true)) {
+            $status = null;
+        }
+
 
         $query = OffdayRequest::query()
             ->join(
@@ -92,32 +121,23 @@ class OffdayRequestController extends Controller
             });
         }
 
-        if (
-            $status !== ''
-            && in_array($status, ['pending', 'approved', 'rejected'], true)
-        ) {
+        if ($officeId !== null) {
+            $query->where('employees.office_id', $officeId);
+        }
+
+        if ($departmentId !== null) {
+            $query->where('employees.department_id', $departmentId);
+        }
+
+        if ($positionId !== null) {
+            $query->where('employees.position_id', $positionId);
+        }
+
+        if ($status !== null) {
             $query->where('offday_requests.status', $status);
         }
 
-        if ($officeId !== '' && $officeId !== 'all') {
-            $query->where('employees.office_id', (int) $officeId);
-        }
-
-        if ($departmentId !== '' && $departmentId !== 'all') {
-            $query->where(
-                'employees.department_id',
-                (int) $departmentId
-            );
-        }
-
-        if ($positionId !== '' && $positionId !== 'all') {
-            $query->where(
-                'employees.position_id',
-                (int) $positionId
-            );
-        }
-
-        $groupedRequests = $query
+        $requests = $query
             ->select([
                 'employees.id as employee_id',
                 'employees.employee_code',
@@ -137,7 +157,7 @@ class OffdayRequestController extends Controller
             ->selectRaw(
                 'MAX(offday_requests.date) as last_request_date'
             )
-             ->selectRaw(
+            ->selectRaw(
                 'MIN(offday_requests.since) as since'
             )
             ->selectRaw(
@@ -178,10 +198,7 @@ class OffdayRequestController extends Controller
                 'offices.name',
                 'offday_requests.status',
             ])
-            ->orderBy('employees.name')
-            ->orderBy('offday_requests.status');
-
-        $requests = $groupedRequests
+            ->orderBy('offday_requests.status', 'desc')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -196,33 +213,22 @@ class OffdayRequestController extends Controller
         });
 
         return Inertia::render('pengajuan/libur/index', [
-            'offdayRequests' => [
-                'data' => OffdayRequestResource::collection(
-                    $requests->getCollection()
-                )->resolve(),
-                'meta' => [
-                    'current_page' => $requests->currentPage(),
-                    'last_page' => $requests->lastPage(),
-                    'per_page' => $requests->perPage(),
-                    'total' => $requests->total(),
-                    'from' => $requests->firstItem(),
-                    'to' => $requests->lastItem(),
-                ],
-                'links' => $requests->linkCollection(),
-            ],
+            'requests' => OffdayRequestResource::collection($requests),
 
             'filters' => [
+                'month' => $month,
+                'year' => $year,
+                'perPage' => $perPage,
                 'search' => $search,
                 'status' => $status,
                 'office_id' => $officeId,
                 'department_id' => $departmentId,
                 'position_id' => $positionId,
-                'month' => $month,
-                'year' => $year,
-                'perPage' => $perPage,
             ],
 
-            'periodLabel' => $periodStart->translatedFormat('F Y'),
+            'periodLabel' => $periodStart->translatedFormat('d F')
+                . ' - '
+                . $periodEnd->translatedFormat('d F'),
 
             'positions' => Position::query()
                 ->select('id', 'name')

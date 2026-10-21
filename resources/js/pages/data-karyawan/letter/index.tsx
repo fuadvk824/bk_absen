@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import type { VisibilityState } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { DataTable } from '@/components/table/datatable';
 import { Button } from '@/components/ui/button';
@@ -37,8 +37,6 @@ interface Props {
     };
 }
 
-
-
 export default function Index({ letters, employees, filters }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -58,6 +56,27 @@ export default function Index({ letters, employees, filters }: Props) {
         exportRoute: 'letter.export',
         allColumns,
     });
+
+     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    
+        const handleSearchChange = (value: string) => {
+            setLocalFilters((prev) => ({
+                ...prev,
+                search: value,
+            }));
+    
+            if (searchTimeout.current) {
+                clearTimeout(searchTimeout.current);
+            }
+    
+            if (value.trim().length < 3 && value.trim().length !== 0) {
+                return;
+            }
+    
+            searchTimeout.current = setTimeout(() => {
+                handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+            }, 500);
+        };
 
     const openCreate = () => {
         setSelectedLetter(null);
@@ -137,10 +156,10 @@ export default function Index({ letters, employees, filters }: Props) {
                     <div className="space-y-1">
                         <Label className="text-[11px]">Cari Surat</Label>
 
-                        <Input
-                            placeholder="Nama, nomor surat..."
+                         <Input
+                            placeholder="Nama, nomor surat (min. 3 huruf)..."
                             value={localFilters.search}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                             className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>

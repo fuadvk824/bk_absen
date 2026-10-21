@@ -1,6 +1,6 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import type { VisibilityState } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 import { DataTable } from '@/components/table/datatable';
@@ -18,7 +18,7 @@ import { useTableActions } from '@/lib/useTableAction';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, FileSpreadsheet, RefreshCw } from 'lucide-react';
+import { CalendarIcon, FileSpreadsheet, Plus, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -54,7 +54,7 @@ interface Props {
 export default function Index({ attendances, filters, offices, departments, shifts }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [isRefreshing, setIsRefreshing] = useState(false);
-    console.log(attendances);
+
     const allColumns = [
         'nama_karyawan',
         'check_in',
@@ -88,6 +88,26 @@ export default function Index({ attendances, filters, offices, departments, shif
         exportRoute: 'attendance.export',
         allColumns,
     });
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleSearchChange = (value: string) => {
+        setLocalFilters((prev) => ({
+            ...prev,
+            search: value,
+        }));
+
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
+        }
+
+        if (value.trim().length < 3 && value.trim().length !== 0) {
+            return;
+        }
+
+        searchTimeout.current = setTimeout(() => {
+            handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+        }, 500);
+    };
 
     const handleResetFilters = () => {
         setIsRefreshing(true);
@@ -125,11 +145,17 @@ export default function Index({ attendances, filters, offices, departments, shif
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            <span className='hidden sm:block'>Refresh</span>
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
-                        <Button variant="outline" onClick={() => handleExport(columnVisibility)}>
+                        <Button variant="outline" onClick={() => handleExport(columnVisibility)} disabled>
                             <FileSpreadsheet className="h-4 w-4" />
-                            <span className='hidden sm:block'>Export</span>
+                            <span className="hidden sm:block">Export</span>
+                        </Button>
+                        <Button asChild>
+                            <Link href={route('attendance.create')}>
+                                <Plus className="h-4 w-4" />
+                                Attendance
+                            </Link>
                         </Button>
                     </div>
                 </div>
@@ -137,10 +163,11 @@ export default function Index({ attendances, filters, offices, departments, shif
                 <div className="grid grid-cols-1 gap-3 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <div className="space-y-1">
                         <Label>Nama Karyawan</Label>
+
                         <Input
-                            placeholder="Cari nama karyawan..."
+                            placeholder="Cari nama karyawan (min. 3 huruf)..."
                             value={localFilters.search}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                             className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>

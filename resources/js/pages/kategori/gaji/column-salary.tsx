@@ -45,6 +45,12 @@ const deleteSalary = (id: number) => {
 };
 
 export const columnSalary = (onEdit: (salary: SalaryList) => void): ColumnDef<SalaryList>[] => [
+   {
+        id: 'nomor',
+        header: () => <div className="flex w-10! items-center justify-center">No.</div>,
+        cell: ({ row }) => <div className="w-10! text-center">{row.index + 1}.</div>,
+    },
+
     {
         accessorKey: 'employee_name',
         header: 'Karyawan',

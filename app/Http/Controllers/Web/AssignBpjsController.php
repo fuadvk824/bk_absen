@@ -188,7 +188,7 @@ class AssignBpjsController extends Controller
                 }
 
                 $salary->update([
-                    'bpjs' => $salary->daily_salary,
+                    'bpjs' => 100000,
                 ]);
 
                 $assigned[] = $employee->name;

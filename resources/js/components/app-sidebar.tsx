@@ -153,7 +153,7 @@ export function AppSidebar() {
                 },
                 {
                     title: 'Kategori Lembur',
-                    href: '/overtime-rate',
+                    href: '/kategori-lembur',
                 },
                 {
                     title: 'Kategori Penilaian',

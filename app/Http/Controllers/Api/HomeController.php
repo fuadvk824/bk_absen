@@ -149,17 +149,32 @@ class HomeController extends Controller
 
     public function checkIn(Request $request, ImageUploadService $imageService)
     {
+        // $request->validate([
+        //     'location_status' => 'required',
+        //     'gambar_checkin' => 'required|image',
+
+        //     'late_reason' => 'nullable|string',
+        //     'late_proof' => 'nullable|image',
+        //     'checkin_at' => 'nullable|date',
+        // ]);
+
+        // $employeeId = $request->user()->employees->id;
+        // $employeeCode = $request->user()->employees->employee_code;
+        $employee = $request->user()->employees;
+        $employeeId = $employee->id;
+        $employeeCode = $employee->employee_code;
+
         $request->validate([
             'location_status' => 'required',
-            'gambar_checkin' => 'required|image',
+
+            'gambar_checkin' => $employeeId == 34
+                ? 'nullable|image'
+                : 'required|image',
 
             'late_reason' => 'nullable|string',
             'late_proof' => 'nullable|image',
             'checkin_at' => 'nullable|date',
         ]);
-
-        $employeeId = $request->user()->employees->id;
-        $employeeCode = $request->user()->employees->employee_code;
 
         $employee = Employee::with(['shift', 'office'])->findOrFail($employeeId);
 
@@ -184,7 +199,6 @@ class HomeController extends Controller
         } else {
             $checkInTime = Carbon::now($timezone);
         }
-
 
         $todayDate = $checkInTime->toDateString();
 
@@ -362,16 +376,30 @@ class HomeController extends Controller
         Request $request,
         ImageUploadService $imageService
     ) {
-        $request->validate([
-            'location_status' => 'required',
-            'gambar_checkout' => 'required|image',
-            'early_reason' => 'nullable|string',
-            'checkout_at' => 'nullable|date',
-        ]);
+        // $request->validate([
+        //     'location_status' => 'required',
+        //     'gambar_checkout' => 'required|image',
+        //     'early_reason' => 'nullable|string',
+        //     'checkout_at' => 'nullable|date',
+        // ]);
 
+        // $employee = $request->user()->employees;
+        // $employeeId = $employee->id;
+        // $employeeCode = $employee->employee_code;
         $employee = $request->user()->employees;
         $employeeId = $employee->id;
         $employeeCode = $employee->employee_code;
+
+        $request->validate([
+            'location_status' => 'required',
+
+            'gambar_checkout' => $employeeId == 34
+                ? 'nullable|image'
+                : 'required|image',
+
+            'early_reason' => 'nullable|string',
+            'checkout_at' => 'nullable|date',
+        ]);
 
         if ($employee->status === 'inactive') {
             return response()->json([

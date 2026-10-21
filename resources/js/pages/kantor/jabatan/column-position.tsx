@@ -43,22 +43,11 @@ const updateStatus = (id: number) => {
 };
 
 export const columnPositions = (onEdit: (position: Position) => void): ColumnDef<Position>[] => [
-    {
-        id: 'select',
-
-        header: ({ table }) => (
-            <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} />
-        ),
-        enableSorting: false,
-        enableHiding: false,
+     {
+        id: 'nomor',
+        header: () => <div className="flex w-10! items-center justify-center">No.</div>,
+        cell: ({ row }) => <div className="w-10! text-center">{row.index + 1}.</div>,
     },
-
     {
         accessorKey: 'position_code',
         header: 'Kode Jabatan',

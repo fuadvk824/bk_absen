@@ -63,21 +63,34 @@ const updateStatus = (item: OffdayList, status: 'approved' | 'rejected') => {
         },
     );
 };
+ 
+const getCoworkerDateKey = (item: OffdayList, date: string): string | null => {
+    if (item.office_id == null || item.department_id == null || item.position_id == null) {
+        return null;
+    }
+
+    return [item.office_id, item.department_id, item.position_id, date].join('|');
+};
 
 const getDuplicateDates = (data: OffdayList[]) => {
-    const dateCounts = new Map<string, number>();
+    const employeeGroups = new Map<string, Set<number>>();
 
     data.forEach((item) => {
-        const uniqueDetails = new Set(
-            item.request_details.map((detail) => [detail.date, detail.status_start_date, detail.status_end_date].join('|')),
-        );
+        item.request_details.forEach((detail) => {
+            const key = getCoworkerDateKey(item, detail.date);
 
-        uniqueDetails.forEach((key) => {
-            dateCounts.set(key, (dateCounts.get(key) ?? 0) + 1);
+            if (!key) return;
+
+            if (!employeeGroups.has(key)) {
+                employeeGroups.set(key, new Set<number>());
+            }
+
+            employeeGroups.get(key)!.add(item.employee_id);
         });
     });
 
-    return new Set([...dateCounts.entries()].filter(([, count]) => count > 1).map(([key]) => key));
+    
+    return new Set([...employeeGroups.entries()].filter(([, employeeIds]) => employeeIds.size > 1).map(([key]) => key));
 };
 
 export const columnOffday = ({
@@ -132,15 +145,17 @@ export const columnOffday = ({
 
         cell: ({ row, table }) => {
             const item = row.original;
+
             const allData = table.getPrePaginationRowModel().rows.map((tableRow) => tableRow.original);
+
             const duplicateDates = getDuplicateDates(allData);
 
             return (
                 <div className="flex flex-wrap gap-2">
-                    {item.request_details.map((detail) => {
-                        const duplicateKey = [detail.date, detail.status_start_date, detail.status_end_date].join('|');
+                    {item.request_details.map((detail, index) => {
+                        const duplicateKey = getCoworkerDateKey(item, detail.date);
 
-                        const isDuplicate = duplicateDates.has(duplicateKey);
+                        const isDuplicate = duplicateKey !== null && duplicateDates.has(duplicateKey);
 
                         const isMasukToLibur =
                             detail.status_start_date.toLowerCase() === 'masuk' &&
@@ -152,7 +167,7 @@ export const columnOffday = ({
 
                         return (
                             <span
-                                key={detail.date}
+                                key={`${detail.date}-${index}`}
                                 className={`inline-flex flex-col items-start gap-1 rounded-md border px-2 py-1.5 text-xs ${
                                     isDuplicate
                                         ? 'border-red-500 bg-red-500 text-white'
@@ -162,7 +177,11 @@ export const columnOffday = ({
                                             ? 'border-black bg-white text-black'
                                             : 'bg-muted'
                                 }`}
-                                title={isDuplicate ? 'Tanggal bentrok dengan pengajuan karyawan lain' : undefined}
+                                title={
+                                    isDuplicate
+                                        ? 'Tanggal libur sama dengan rekan kerja di office, department, dan position yang sama'
+                                        : undefined
+                                }
                             >
                                 <span className="font-medium">{formatDate(detail.date)}</span>
 
@@ -192,8 +211,8 @@ export const columnOffday = ({
 
             return (
                 <div className="flex flex-col">
-                    <span className='text-xs font-medium'>{time}</span>
-                    <span className='text-xs text-muted-foreground'>{`${day}-${month}-${year}`}</span>
+                    <span className="text-xs font-medium">{time}</span>
+                    <span className="text-xs text-muted-foreground">{`${day}-${month}-${year}`}</span>
                 </div>
             );
         },

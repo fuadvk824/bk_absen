@@ -17,13 +17,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { toast } from 'sonner';
 import { CheckCheck } from 'lucide-react';
@@ -58,9 +52,10 @@ export const columnWorkSchedules = (
 ): ColumnDef<WorkSchedule>[] => {
     const now = new Date();
 
-    const todayString = `${now.getFullYear()}-${String(
-        now.getMonth() + 1,
-    ).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+        2,
+        '0',
+    )}-${String(now.getDate()).padStart(2, '0')}`;
 
     const updateSchedule = async (id: number, value: string) => {
         let payload: any = {};
@@ -103,16 +98,23 @@ export const columnWorkSchedules = (
         });
     };
 
+
     const baseColumns: ColumnDef<WorkSchedule>[] = [
         {
             accessorKey: 'employee_name',
             header: 'Nama Karyawan',
             cell: ({ row }) => {
                 if (row.original.is_bulk) {
-                    return <div className="font-bold">Update Semua</div>;
+                    return <div className="font-bold">Atur Semua</div>;
                 }
 
-                return row.original.name;
+                return (
+                    <div className="flex items-center gap-2">
+                        <span className="w-6 shrink-0 text-center text-muted-foreground">{row.index}.</span>
+
+                        <span className="font-medium">{row.original.name}</span>
+                    </div>
+                );
             },
             meta: {
                 sticky: 'left',
@@ -128,9 +130,7 @@ export const columnWorkSchedules = (
         dayColumns.push({
             id: `day_${period.date}`,
             header: () => {
-                const [year, month, day] = period.date
-                    .split('-')
-                    .map(Number);
+                const [year, month, day] = period.date.split('-').map(Number);
 
                 const dateObj = new Date(year, month - 1, day);
 
@@ -153,24 +153,18 @@ export const columnWorkSchedules = (
             },
 
             cell: ({ row }) => {
-              
                 if (row.original.is_bulk) {
                     const [selectedValue, setSelectedValue] = useState('');
                     const [pendingValue, setPendingValue] = useState('');
                     const [open, setOpen] = useState(false);
 
                     const selectedShiftName =
-                        pendingValue === 'off'
-                            ? 'Libur'
-                            : shifts.find(
-                                  (s) =>
-                                      s.id.toString() === pendingValue,
-                              )?.name_shift;
+                        pendingValue === 'off' ? 'Libur' : shifts.find((s) => s.id.toString() === pendingValue)?.name_shift;
 
                     const handleConfirm = async () => {
                         await updateBulk(period.date, pendingValue);
 
-                        setSelectedValue(pendingValue); 
+                        setSelectedValue(pendingValue);
                         setPendingValue('');
                         setOpen(false);
                     };
@@ -186,20 +180,15 @@ export const columnWorkSchedules = (
                                             setOpen(true);
                                         }}
                                     >
-                                        <SelectTrigger className="h-6 bg-muted font-semibold">
-                                            <SelectValue placeholder="Set All" className='text-black' />
+                                        <SelectTrigger className="h-6 border border-black bg-white font-semibold cursor-pointer">
+                                            <SelectValue placeholder="Set All" className="text-black" />
                                         </SelectTrigger>
 
                                         <SelectContent>
-                                            <SelectItem value="off">
-                                                Libur
-                                            </SelectItem>
+                                            <SelectItem value="off">Libur</SelectItem>
 
                                             {shifts.map((s) => (
-                                                <SelectItem
-                                                    key={s.id}
-                                                    value={s.id.toString()}
-                                                >
+                                                <SelectItem key={s.id} value={s.id.toString()}>
                                                     {s.name_shift}
                                                 </SelectItem>
                                             ))}
@@ -214,21 +203,12 @@ export const columnWorkSchedules = (
                                         <CheckCheck />
                                     </AlertDialogMedia>
 
-                                    <AlertDialogTitle>
-                                        Bulk Update Shift
-                                    </AlertDialogTitle>
+                                    <AlertDialogTitle>Bulk Update Shift</AlertDialogTitle>
 
                                     <AlertDialogDescription>
-                                        Semua karyawan sesuai filter akan
-                                        diubah menjadi{' '}
-                                        <span className="font-semibold">
-                                            {selectedShiftName}
-                                        </span>{' '}
-                                        pada tanggal{' '}
-                                        <span className="font-semibold">
-                                            {period.date}
-                                        </span>
-                                        .
+                                        Semua karyawan sesuai filter akan diubah menjadi{' '}
+                                        <span className="font-semibold">{selectedShiftName}</span> pada tanggal{' '}
+                                        <span className="font-semibold">{period.date}</span>.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
 
@@ -243,10 +223,7 @@ export const columnWorkSchedules = (
                                         Cancel
                                     </AlertDialogCancel>
 
-                                    <AlertDialogAction
-                                        className="bg-yellow-600! hover:bg-black!"
-                                        onClick={handleConfirm}
-                                    >
+                                    <AlertDialogAction className="bg-yellow-600! hover:bg-black!" onClick={handleConfirm}>
                                         Ya, Update Semua
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
@@ -258,11 +235,7 @@ export const columnWorkSchedules = (
                 const day = row.original.dayMap?.[period.date];
 
                 const [selectedValue, setSelectedValue] = useState(
-                    day?.is_off
-                        ? 'off'
-                        : day?.shift_id
-                        ? day.shift_id.toString()
-                        : '',
+                    day?.is_off ? 'off' : day?.shift_id ? day.shift_id.toString() : '',
                 );
 
                 const [pendingValue, setPendingValue] = useState('');
@@ -271,12 +244,7 @@ export const columnWorkSchedules = (
                 if (!day) return <div>-</div>;
 
                 const selectedShiftName =
-                    pendingValue === 'off'
-                        ? 'Libur'
-                        : shifts.find(
-                              (s) =>
-                                  s.id.toString() === pendingValue,
-                          )?.name_shift;
+                    pendingValue === 'off' ? 'Libur' : shifts.find((s) => s.id.toString() === pendingValue)?.name_shift;
 
                 const handleConfirm = async () => {
                     await updateSchedule(day.id, pendingValue);
@@ -297,20 +265,15 @@ export const columnWorkSchedules = (
                                         setOpen(true);
                                     }}
                                 >
-                                    <SelectTrigger className="h-6">
+                                    <SelectTrigger className="h-6 bg-white cursor-pointer">
                                         <SelectValue />
                                     </SelectTrigger>
 
                                     <SelectContent>
-                                        <SelectItem value="off">
-                                            Libur
-                                        </SelectItem>
+                                        <SelectItem value="off">Libur</SelectItem>
 
                                         {shifts.map((s: Shift) => (
-                                            <SelectItem
-                                                key={s.id}
-                                                value={s.id.toString()}
-                                            >
+                                            <SelectItem key={s.id} value={s.id.toString()}>
                                                 {s.name_shift}
                                             </SelectItem>
                                         ))}
@@ -325,17 +288,11 @@ export const columnWorkSchedules = (
                                     <CheckCheck className="text-green-600" />
                                 </AlertDialogMedia>
 
-                                <AlertDialogTitle>
-                                    Update Shift
-                                </AlertDialogTitle>
+                                <AlertDialogTitle>Update Shift</AlertDialogTitle>
 
                                 <AlertDialogDescription>
-                                    Apakah kamu yakin ingin mengganti shift
-                                    menjadi{' '}
-                                    <span className="font-semibold">
-                                        {selectedShiftName}
-                                    </span>{' '}
-                                    ?
+                                    Apakah kamu yakin ingin mengganti shift menjadi{' '}
+                                    <span className="font-semibold">{selectedShiftName}</span> ?
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
 
@@ -350,10 +307,7 @@ export const columnWorkSchedules = (
                                     Cancel
                                 </AlertDialogCancel>
 
-                                <AlertDialogAction
-                                    className="bg-green-600! hover:bg-black!"
-                                    onClick={handleConfirm}
-                                >
+                                <AlertDialogAction className="bg-green-600! hover:bg-black!" onClick={handleConfirm}>
                                     Ya, Update
                                 </AlertDialogAction>
                             </AlertDialogFooter>

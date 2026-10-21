@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\LeaveRequest;
+use App\Http\Resources\Web\LeaveBalanceResource;
 use App\Http\Resources\Web\LeaveResource;
+use App\Models\LeaveBalance;
 use App\Models\LeaveCategory;
 use App\Services\CodeGeneratorService;
 use Illuminate\Http\Request;
@@ -31,6 +33,51 @@ class LeaveController extends Controller
             ],
         ]);
     }
+
+    public function balances(Request $request, LeaveCategory $leave)
+    {
+        $year = $request->integer('year', now()->year);
+        $perPage = $request->integer('perPage', 10);
+        $search = trim($request->string('search')->toString());
+
+        $year = max(2000, min($year, 2100));
+        $perPage = in_array($perPage, [10, 25, 50, 100], true)
+            ? $perPage
+            : 10;
+
+        $balances = LeaveBalance::query()
+            ->with('employee')
+            ->where('leave_category_id', $leave->id)
+            ->where('year', $year)
+            ->when(
+                mb_strlen($search) >= 3,
+                function ($query) use ($search) {
+                    $query->whereHas('employee', function ($employeeQuery) use ($search) {
+                        $employeeQuery->where('name', 'like', '%' . $search . '%');
+                    });
+                }
+            )
+            ->orderBy('employee_id')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return Inertia::render('kategori/cuti/balances', [
+            'leave' => [
+                'id' => $leave->id,
+                'leave_code' => $leave->leave_code,
+                'leave_name' => $leave->leave_name,
+            ],
+            'balances' => LeaveBalanceResource::collection($balances)
+                ->response()
+                ->getData(true),
+            'filters' => [
+                'year' => $year,
+                'perPage' => $perPage,
+                'search' => mb_strlen($search) >= 3 ? $search : '',
+            ],
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('kategori/cuti/create');

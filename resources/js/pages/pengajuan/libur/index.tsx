@@ -9,13 +9,7 @@ import { DataTable } from '@/components/table/datatable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import {
     AlertDialog,
@@ -33,10 +27,7 @@ import type { PaginationMeta } from '@/types/pagination';
 import { useTableActions } from '@/lib/useTableAction';
 import { FileSpreadsheet, RefreshCw } from 'lucide-react';
 
-import type {
-    OffdayFilters,
-    OffdayList,
-} from '@/types/pengajuan/offdaylist';
+import type { OffdayFilters, OffdayList } from '@/types/pengajuan/offdaylist';
 import { columnOffday } from './column-offday';
 
 interface FilterOption {
@@ -45,7 +36,7 @@ interface FilterOption {
 }
 
 interface Props {
-    offdayRequests: {
+    requests: {
         data: OffdayList[];
         meta: PaginationMeta;
     };
@@ -73,51 +64,28 @@ const months = [
 
 type BulkStatus = 'approved' | 'rejected';
 
-export default function Index({
-    offdayRequests,
-    filters,
-    periodLabel,
-    positions,
-    departments,
-    offices,
-}: Props) {
-    const [columnVisibility, setColumnVisibility] =
-        useState<VisibilityState>({});
+export default function Index({ requests, filters, periodLabel, positions, departments, offices }: Props) {
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
-    const [selectedKeys, setSelectedKeys] = useState<Set<string>>(
-        new Set(),
-    );
+    const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
-    const [bulkStatus, setBulkStatus] = useState<BulkStatus | null>(
-        null,
-    );
+    const [bulkStatus, setBulkStatus] = useState<BulkStatus | null>(null);
 
     const [localFilters, setLocalFilters] = useState({
         search: filters.search ?? '',
         status: filters.status ?? '',
-        office_id: filters.office_id
-            ? String(filters.office_id)
-            : 'all',
-        department_id: filters.department_id
-            ? String(filters.department_id)
-            : 'all',
-        position_id: filters.position_id
-            ? String(filters.position_id)
-            : 'all',
+        office_id: filters.office_id ? String(filters.office_id) : 'all',
+        department_id: filters.department_id ? String(filters.department_id) : 'all',
+        position_id: filters.position_id ? String(filters.position_id) : 'all',
         month: Number(filters.month),
         year: Number(filters.year),
         perPage: Number(filters.perPage ?? 10),
     });
 
-    const allColumns = [
-        'employee_name',
-        'team_name',
-        'request_dates',
-        'status',
-    ];
+    const allColumns = ['employee_name', 'team_name', 'request_dates', 'status'];
 
     const { handleExport } = useTableActions({
         filters: localFilters,
@@ -128,44 +96,25 @@ export default function Index({
 
     const currentYear = new Date().getFullYear();
 
-    const years = Array.from(
-        { length: 20 },
-        (_, index) => currentYear - 2 + index,
-    );
+    const years = Array.from({ length: 20 }, (_, index) => currentYear - 2 + index);
 
-    const getRowKey = (item: OffdayList) =>
-        `${item.employee_id}-${item.period_start}`;
+    const getRowKey = (item: OffdayList) => `${item.employee_id}-${item.period_start}`;
 
-    const pendingRows = useMemo(
-        () =>
-            offdayRequests.data.filter(
-                (item) => item.status === 'pending',
-            ),
-        [offdayRequests.data],
-    );
+    const pendingRows = useMemo(() => requests.data.filter((item) => item.status === 'pending'), [requests.data]);
 
     const visiblePendingKeys = pendingRows.map(getRowKey);
 
-    const allSelected =
-        visiblePendingKeys.length > 0 &&
-        visiblePendingKeys.every((key) => selectedKeys.has(key));
+    const allSelected = visiblePendingKeys.length > 0 && visiblePendingKeys.every((key) => selectedKeys.has(key));
 
-    const someSelected =
-        visiblePendingKeys.some((key) => selectedKeys.has(key)) &&
-        !allSelected;
+    const someSelected = visiblePendingKeys.some((key) => selectedKeys.has(key)) && !allSelected;
 
-    const selectedGroups = pendingRows.filter((item) =>
-        selectedKeys.has(getRowKey(item)),
-    );
+    const selectedGroups = pendingRows.filter((item) => selectedKeys.has(getRowKey(item)));
 
     useEffect(() => {
         setSelectedKeys(new Set());
-    }, [offdayRequests.data]);
+    }, [requests.data]);
 
-    const toggleSelection = (
-        key: string,
-        checked: boolean,
-    ) => {
+    const toggleSelection = (key: string, checked: boolean) => {
         setSelectedKeys((previous) => {
             const next = new Set(previous);
 
@@ -207,9 +156,7 @@ export default function Index({
         [selectedKeys, allSelected, someSelected],
     );
 
-    const applyFilters = (
-        changes: Partial<typeof localFilters>,
-    ) => {
+    const applyFilters = (changes: Partial<typeof localFilters>) => {
         const nextFilters = {
             ...localFilters,
             ...changes,
@@ -223,18 +170,9 @@ export default function Index({
             {
                 search: nextFilters.search || '',
                 status: nextFilters.status || '',
-                office_id:
-                    nextFilters.office_id === 'all'
-                        ? ''
-                        : nextFilters.office_id,
-                department_id:
-                    nextFilters.department_id === 'all'
-                        ? ''
-                        : nextFilters.department_id,
-                position_id:
-                    nextFilters.position_id === 'all'
-                        ? ''
-                        : nextFilters.position_id,
+                office_id: nextFilters.office_id === 'all' ? '' : nextFilters.office_id,
+                department_id: nextFilters.department_id === 'all' ? '' : nextFilters.department_id,
+                position_id: nextFilters.position_id === 'all' ? '' : nextFilters.position_id,
                 month: nextFilters.month,
                 year: nextFilters.year,
                 perPage: nextFilters.perPage,
@@ -254,16 +192,11 @@ export default function Index({
 
         const today = new Date();
 
-        const defaultPeriodDate = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-        );
+       
+        const defaultPeriodDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
         if (defaultPeriodDate.getDate() < 26) {
-            defaultPeriodDate.setMonth(
-                defaultPeriodDate.getMonth() - 1,
-            );
+            defaultPeriodDate.setMonth(defaultPeriodDate.getMonth() - 1);
         }
 
         const defaultFilters = {
@@ -281,13 +214,11 @@ export default function Index({
 
         router.get(
             route('offday.index'),
-            {
-                month: defaultFilters.month,
-                year: defaultFilters.year,
-                perPage: defaultFilters.perPage,
-            },
+            {},
             {
                 replace: true,
+                preserveState: false,
+                preserveScroll: true,
                 onFinish: () => setIsRefreshing(false),
             },
         );
@@ -295,9 +226,7 @@ export default function Index({
 
     const handleBulkStatus = (status: BulkStatus) => {
         if (selectedGroups.length === 0) {
-            toast.error(
-                'Pilih minimal satu pengajuan pending.',
-            );
+            toast.error('Pilih minimal satu pengajuan pending.');
             return;
         }
 
@@ -340,12 +269,7 @@ export default function Index({
                 },
 
                 onError: (errors) => {
-                    toast.error(
-                        String(
-                            Object.values(errors)[0] ??
-                                'Terjadi kesalahan saat memproses pengajuan.',
-                        ),
-                    );
+                    toast.error(String(Object.values(errors)[0] ?? 'Terjadi kesalahan saat memproses pengajuan.'));
                 },
 
                 onFinish: () => {
@@ -369,50 +293,32 @@ export default function Index({
             <div className="space-y-4 p-5">
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-lg font-semibold sm:text-xl">
-                            Pengajuan Libur
-                        </h1>
+                        <h1 className="text-lg font-semibold sm:text-xl">Pengajuan Libur</h1>
 
-                        <span className="text-xs text-muted-foreground sm:text-sm">
-                            Periode: {periodLabel}
-                        </span>
+                        <span className="text-xs text-muted-foreground sm:text-sm">Periode: {periodLabel}</span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
                         <Button
                             variant="outline"
-                            disabled={
-                                selectedGroups.length === 0 ||
-                                isBulkProcessing
-                            }
-                            onClick={() =>
-                                setBulkStatus('approved')
-                            }
+                            disabled={selectedGroups.length === 0 || isBulkProcessing}
+                            onClick={() => setBulkStatus('approved')}
                             className="cursor-pointer text-green-600"
                         >
                             <CheckCheck className="h-4 w-4" />
 
-                            <span>
-                                Approve ({selectedGroups.length})
-                            </span>
+                            <span>Approve ({selectedGroups.length})</span>
                         </Button>
 
                         <Button
                             variant="outline"
-                            disabled={
-                                selectedGroups.length === 0 ||
-                                isBulkProcessing
-                            }
-                            onClick={() =>
-                                setBulkStatus('rejected')
-                            }
+                            disabled={selectedGroups.length === 0 || isBulkProcessing}
+                            onClick={() => setBulkStatus('rejected')}
                             className="cursor-pointer text-red-600"
                         >
                             <X className="h-4 w-4" />
 
-                            <span>
-                                Reject ({selectedGroups.length})
-                            </span>
+                            <span>Reject ({selectedGroups.length})</span>
                         </Button>
 
                         <Button
@@ -421,40 +327,22 @@ export default function Index({
                             disabled={isRefreshing}
                             className="cursor-pointer"
                         >
-                            <RefreshCw
-                                className={`h-4 w-4 ${
-                                    isRefreshing
-                                        ? 'animate-spin'
-                                        : ''
-                                }`}
-                            />
+                            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
 
-                            <span className="hidden sm:block">
-                                Refresh
-                            </span>
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
 
-                        <Button
-                            variant="outline"
-                            onClick={() =>
-                                handleExport(columnVisibility)
-                            }
-                            className="cursor-pointer"
-                        >
+                        <Button variant="outline" onClick={() => handleExport(columnVisibility)} className="cursor-pointer">
                             <FileSpreadsheet className="h-4 w-4" />
 
-                            <span className="hidden sm:block">
-                                Export
-                            </span>
+                            <span className="hidden sm:block">Export</span>
                         </Button>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Nama Karyawan
-                        </Label>
+                        <Label className="text-[11px]">Nama Karyawan</Label>
 
                         <Input
                             placeholder="Cari nama karyawan..."
@@ -469,9 +357,7 @@ export default function Index({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Periode
-                        </Label>
+                        <Label className="text-[11px]">Periode</Label>
 
                         <Select
                             value={String(localFilters.month)}
@@ -487,10 +373,7 @@ export default function Index({
 
                             <SelectContent>
                                 {months.map((item) => (
-                                    <SelectItem
-                                        key={item.value}
-                                        value={String(item.value)}
-                                    >
+                                    <SelectItem key={item.value} value={String(item.value)}>
                                         {item.label}
                                     </SelectItem>
                                 ))}
@@ -499,9 +382,7 @@ export default function Index({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Tahun Periode
-                        </Label>
+                        <Label className="text-[11px]">Tahun Periode</Label>
 
                         <Select
                             value={String(localFilters.year)}
@@ -517,21 +398,43 @@ export default function Index({
 
                             <SelectContent>
                                 {years.map((year) => (
-                                    <SelectItem
-                                        key={year}
-                                        value={String(year)}
-                                    >
+                                    <SelectItem key={year} value={String(year)}>
                                         {year}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
+                    
+                    <div className="space-y-1">
+                        <Label className="text-[11px]">Status Pengajuan</Label>
+
+                        <Select
+                            value={localFilters.status || 'all'}
+                            onValueChange={(value) =>
+                                applyFilters({
+                                    status: value === 'all' ? '' : value,
+                                })
+                            }
+                        >
+                            <SelectTrigger className="h-9">
+                                <SelectValue placeholder="Semua status" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                <SelectItem value="all">Semua Status</SelectItem>
+
+                                <SelectItem value="pending">Pending</SelectItem>
+
+                                <SelectItem value="approved">Disetujui</SelectItem>
+
+                                <SelectItem value="rejected">Ditolak</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
                     <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Position
-                        </Label>
+                        <Label className="text-[11px]">Position</Label>
 
                         <Select
                             value={localFilters.position_id}
@@ -546,15 +449,10 @@ export default function Index({
                             </SelectTrigger>
 
                             <SelectContent>
-                                <SelectItem value="all">
-                                    Semua Position
-                                </SelectItem>
+                                <SelectItem value="all">Semua Position</SelectItem>
 
                                 {positions.map((position) => (
-                                    <SelectItem
-                                        key={position.id}
-                                        value={String(position.id)}
-                                    >
+                                    <SelectItem key={position.id} value={String(position.id)}>
                                         {position.name}
                                     </SelectItem>
                                 ))}
@@ -563,9 +461,7 @@ export default function Index({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Department
-                        </Label>
+                        <Label className="text-[11px]">Department</Label>
 
                         <Select
                             value={localFilters.department_id}
@@ -580,15 +476,10 @@ export default function Index({
                             </SelectTrigger>
 
                             <SelectContent>
-                                <SelectItem value="all">
-                                    Semua Department
-                                </SelectItem>
+                                <SelectItem value="all">Semua Department</SelectItem>
 
                                 {departments.map((department) => (
-                                    <SelectItem
-                                        key={department.id}
-                                        value={String(department.id)}
-                                    >
+                                    <SelectItem key={department.id} value={String(department.id)}>
                                         {department.name}
                                     </SelectItem>
                                 ))}
@@ -597,9 +488,7 @@ export default function Index({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Office
-                        </Label>
+                        <Label className="text-[11px]">Office</Label>
 
                         <Select
                             value={localFilters.office_id}
@@ -614,15 +503,10 @@ export default function Index({
                             </SelectTrigger>
 
                             <SelectContent>
-                                <SelectItem value="all">
-                                    Semua Office
-                                </SelectItem>
+                                <SelectItem value="all">Semua Office</SelectItem>
 
                                 {offices.map((office) => (
-                                    <SelectItem
-                                        key={office.id}
-                                        value={String(office.id)}
-                                    >
+                                    <SelectItem key={office.id} value={String(office.id)}>
                                         {office.name}
                                     </SelectItem>
                                 ))}
@@ -630,55 +514,14 @@ export default function Index({
                         </Select>
                     </div>
 
-                    <div className="space-y-1">
-                        <Label className="text-[11px]">
-                            Status Pengajuan
-                        </Label>
-
-                        <Select
-                            value={localFilters.status || 'all'}
-                            onValueChange={(value) =>
-                                applyFilters({
-                                    status:
-                                        value === 'all'
-                                            ? ''
-                                            : value,
-                                })
-                            }
-                        >
-                            <SelectTrigger className="h-9">
-                                <SelectValue placeholder="Semua status" />
-                            </SelectTrigger>
-
-                            <SelectContent>
-                                <SelectItem value="all">
-                                    Semua Status
-                                </SelectItem>
-
-                                <SelectItem value="pending">
-                                    Pending
-                                </SelectItem>
-
-                                <SelectItem value="approved">
-                                    Disetujui
-                                </SelectItem>
-
-                                <SelectItem value="rejected">
-                                    Ditolak
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
                 </div>
 
                 <DataTable<OffdayList>
                     columns={columns}
-                    data={offdayRequests.data}
-                    meta={offdayRequests.meta}
+                    data={requests.data}
+                    meta={requests.meta}
                     columnVisibility={columnVisibility}
-                    onColumnVisibilityChange={
-                        setColumnVisibility
-                    }
+                    onColumnVisibilityChange={setColumnVisibility}
                     perPage={localFilters.perPage}
                     onPerPageChange={(value) =>
                         applyFilters({
@@ -690,10 +533,7 @@ export default function Index({
                 <AlertDialog
                     open={bulkStatus !== null}
                     onOpenChange={(open) => {
-                        if (
-                            !open &&
-                            !isBulkProcessing
-                        ) {
+                        if (!open && !isBulkProcessing) {
                             setBulkStatus(null);
                         }
                     }}
@@ -701,39 +541,23 @@ export default function Index({
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>
-                                {bulkStatus === 'approved'
-                                    ? 'Approve Pengajuan Terpilih'
-                                    : 'Reject Pengajuan Terpilih'}
+                                {bulkStatus === 'approved' ? 'Approve Pengajuan Terpilih' : 'Reject Pengajuan Terpilih'}
                             </AlertDialogTitle>
 
                             <AlertDialogDescription>
-                                Apakah kamu yakin ingin{' '}
-                                {bulkStatus === 'approved'
-                                    ? 'menyetujui'
-                                    : 'menolak'}{' '}
-                                seluruh pengajuan dari{' '}
-                                <strong>
-                                    {selectedGroups.length} karyawan
-                                </strong>{' '}
-                                yang dipilih? Semua pengajuan pending
-                                dalam periode masing-masing akan
-                                diproses.
+                                Apakah kamu yakin ingin {bulkStatus === 'approved' ? 'menyetujui' : 'menolak'} seluruh
+                                pengajuan dari <strong>{selectedGroups.length} karyawan</strong> yang dipilih? Semua
+                                pengajuan pending dalam periode masing-masing akan diproses.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
 
                         <AlertDialogFooter>
-                            <AlertDialogCancel
-                                disabled={isBulkProcessing}
-                                className="cursor-pointer"
-                            >
+                            <AlertDialogCancel disabled={isBulkProcessing} className="cursor-pointer">
                                 Batal
                             </AlertDialogCancel>
 
                             <AlertDialogAction
-                                disabled={
-                                    isBulkProcessing ||
-                                    selectedGroups.length === 0
-                                }
+                                disabled={isBulkProcessing || selectedGroups.length === 0}
                                 className={
                                     bulkStatus === 'approved'
                                         ? 'cursor-pointer bg-green-600 text-white hover:bg-green-700'
@@ -743,9 +567,7 @@ export default function Index({
                                     event.preventDefault();
 
                                     if (bulkStatus) {
-                                        handleBulkStatus(
-                                            bulkStatus,
-                                        );
+                                        handleBulkStatus(bulkStatus);
                                     }
                                 }}
                             >

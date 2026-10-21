@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import type { VisibilityState } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { DataTable } from '@/components/table/datatable';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { Shift, WorkSchedule } from '@/types/data-karyawan/work-schedule-list';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { FileSpreadsheet, RefreshCw } from 'lucide-react';
+import { WorkScheduleSearch } from './work-schedule-search';
 
 interface Option {
     id: number;
@@ -76,19 +77,46 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
         allColumns,
     });
 
-    const employeesOptimized = employees.data.map((emp) => {
-        const schedule = emp.work_schedule?.[0] ?? null;
-        const dayMap: Record<string, any> = {};
+    // const employeesOptimized = employees.data.map((emp) => {
+    //     const schedule = emp.work_schedule?.[0] ?? null;
+    //     const dayMap: Record<string, any> = {};
 
-        schedule?.days?.forEach((d) => {
-            dayMap[d.work_date] = d;
+    //     schedule?.days?.forEach((d) => {
+    //         dayMap[d.work_date] = d;
+    //     });
+
+    //     return {
+    //         ...emp,
+    //         dayMap,
+    //     };
+    // });
+
+    // const bulkRow: WorkSchedule = {
+    //     id: 0,
+    //     name: 'Atur Semua',
+    //     shift: {} as Shift,
+    //     work_schedule: [],
+    //     dayMap: {},
+    //     is_bulk: true,
+    // };
+
+    // const employeesWithBulk = [bulkRow, ...employeesOptimized];
+
+    const employeesOptimized = useMemo(() => {
+        return employees.data.map((emp) => {
+            const schedule = emp.work_schedule?.[0] ?? null;
+            const dayMap: Record<string, any> = {};
+
+            schedule?.days?.forEach((d) => {
+                dayMap[d.work_date] = d;
+            });
+
+            return {
+                ...emp,
+                dayMap,
+            };
         });
-
-        return {
-            ...emp,
-            dayMap,
-        };
-    });
+    }, [employees.data]);
 
     const bulkRow: WorkSchedule = {
         id: 0,
@@ -99,7 +127,7 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
         is_bulk: true,
     };
 
-    const employeesWithBulk = [bulkRow, ...employeesOptimized];
+    const employeesWithBulk = useMemo(() => [bulkRow, ...employeesOptimized], [employeesOptimized]);
 
     const columns = useMemo(
         () =>
@@ -173,11 +201,20 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
                 <div className="grid grid-cols-1 gap-3 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <div className="space-y-1">
                         <Label>Search Nama</Label>
-                        <Input
-                            value={localFilters.search ?? ''}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            placeholder="Cari nama..."
+                        {/* <Input
+                            placeholder="Cari nama karyawan (min. 3 huruf)..."
+                            value={localFilters.search}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                             className="h-7 p-4 placeholder:text-xs"
+                        /> */}
+
+                        <WorkScheduleSearch
+                            initialValue={localFilters.search}
+                            onSearch={(value) => {
+                                if (value === localFilters.search) return;
+
+                                handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+                            }}
                         />
                     </div>
                     <div className="space-y-1">

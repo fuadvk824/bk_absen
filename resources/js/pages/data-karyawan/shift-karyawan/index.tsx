@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { VisibilityState } from '@tanstack/react-table';
 
 import { DataTable } from '@/components/table/datatable';
@@ -42,6 +42,28 @@ export default function Index({ shifts, filters }: Props) {
         exportRoute: 'shift.export',
         allColumns,
     });
+
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleSearchChange = (value: string) => {
+        setLocalFilters((prev) => ({
+            ...prev,
+            search: value,
+        }));
+
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
+        }
+
+        if (value.trim().length < 3 && value.trim().length !== 0) {
+            return;
+        }
+
+        searchTimeout.current = setTimeout(() => {
+            handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+        }, 500);
+    };
+
     const handleResetFilters = () => {
         setIsRefreshing(true);
         const defaultFilters = {
@@ -65,7 +87,7 @@ export default function Index({ shifts, filters }: Props) {
                     <div className="flex flex-wrap gap-2">
                         <Button variant="outline" onClick={handleResetFilters} className="cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                             <span className="hidden sm:block">Refresh</span>
+                            <span className="hidden sm:block">Refresh</span>
                         </Button>
                         <Button variant="outline" onClick={() => handleExport(columnVisibility)}>
                             <FileSpreadsheet className="h-4 w-4" />
@@ -86,10 +108,10 @@ export default function Index({ shifts, filters }: Props) {
                     <div className="space-y-1">
                         <Label>Nama Shift</Label>
                         <Input
-                            placeholder="Cari nama shift..."
+                            placeholder="Cari nama shift (min. 3 huruf)..."
                             value={localFilters.search}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
-                            className="h-7  p-4 placeholder:text-xs"
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>
                 </div>

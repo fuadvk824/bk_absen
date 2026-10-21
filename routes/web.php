@@ -93,7 +93,14 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
                 ->name('approval');
             Route::put('/{attendance}', [AttendanceController::class, 'update'])
                 ->name('update');
+
+            Route::get('/create', [AttendanceController::class, 'create'])
+                ->name('create');
+
+            Route::post('/', [AttendanceController::class, 'store'])
+                ->name('store');
         });
+      
 
     Route::prefix('overtime')
         ->name('overtime.')
@@ -106,15 +113,14 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             // Route::post('/store', [OvertimeController::class, 'store'])->name('store');
         });
 
-    Route::prefix('overtime-rate')
-        ->name('overtime-rate.')
+    Route::prefix('kategori-lembur')
+        ->name('kategori-lembur.')
         ->group(function () {
             Route::get('/', [OvertimeRateController::class, 'index'])->name('index');
             Route::post('/store', [OvertimeRateController::class, 'store'])->name('store');
-            Route::put('/{overtimeRate}', [OvertimeRateController::class, 'update'])->name('update');
-            Route::delete('/{overtimeRate}', [OvertimeRateController::class, 'destroy'])->name('destroy');
+            Route::put('/{kategori-lembur}', [OvertimeRateController::class, 'update'])->name('update');
+            Route::delete('/{kategori-lembur}', [OvertimeRateController::class, 'destroy'])->name('destroy');
         });
-
     Route::prefix('shift')
         ->name('shift.')
         ->group(function () {
@@ -151,6 +157,10 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin'])->group(functio
             Route::get('/{leave}/edit', [LeaveController::class, 'edit'])->name('edit');
             Route::put('/{leave}', [LeaveController::class, 'update'])->name('update');
             Route::delete('/{leave}', [LeaveController::class, 'destroy'])->name('destroy');
+            Route::get('/{leave}/balances', [
+                LeaveController::class,
+                'balances',
+            ])->name('balances');
         });
 
     Route::prefix('leaveassign')

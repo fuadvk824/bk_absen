@@ -43,6 +43,11 @@ const updatePayrollStatus = (id: number) => {
 
 export const columnPayrolls = (onShowDetail: (payroll: Payroll) => void): ColumnDef<Payroll>[] => [
     {
+        id: 'nomor',
+        header: () => <div className="flex w-10! items-center justify-center">No.</div>,
+        cell: ({ row }) => <div className="w-10! text-center">{row.index + 1}.</div>,
+    },
+    {
         accessorKey: 'employee.name',
         header: 'Karyawan',
 

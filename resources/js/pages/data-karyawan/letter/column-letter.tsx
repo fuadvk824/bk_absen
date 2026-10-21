@@ -326,21 +326,9 @@ const ActionCell = ({ letter, onEdit }: { letter: Letter; onEdit: (letter: Lette
 
 export const columnLetters = (onEdit: (letter: Letter) => void): ColumnDef<Letter>[] => [
     {
-        id: 'select',
-
-        header: ({ table }) => (
-            <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            />
-        ),
-
-        cell: ({ row }) => (
-            <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} />
-        ),
-
-        enableSorting: false,
-        enableHiding: false,
+        id: 'nomor',
+        header: () => <div className="flex w-10! items-center justify-center">No.</div>,
+        cell: ({ row }) => <div className="w-10! text-center">{row.index + 1}.</div>,
     },
 
     {

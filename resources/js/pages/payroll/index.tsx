@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { VisibilityState } from '@tanstack/react-table';
 
@@ -89,6 +89,26 @@ export default function Index({ payrolls, filters, offices }: Props) {
         exportRoute: 'payroll.export',
         allColumns,
     });
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleSearchChange = (value: string) => {
+        setLocalFilters((prev) => ({
+            ...prev,
+            search: value,
+        }));
+
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
+        }
+
+        if (value.trim().length < 3 && value.trim().length !== 0) {
+            return;
+        }
+
+        searchTimeout.current = setTimeout(() => {
+            handleFilterChange({ ...localFilters, search: value }, setLocalFilters, 'search', value);
+        }, 500);
+    };
 
     const handleResetFilters = () => {
         setIsRefreshing(true);
@@ -154,9 +174,9 @@ export default function Index({ payrolls, filters, offices }: Props) {
                         <Label>Nama Karyawan</Label>
 
                         <Input
-                            placeholder="Cari nama..."
+                            placeholder="Cari nama karyawan (min. 3 huruf)..."
                             value={localFilters.search}
-                            onChange={(e) => handleFilterChange(localFilters, setLocalFilters, 'search', e.target.value)}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                             className="h-7 p-4 placeholder:text-xs"
                         />
                     </div>

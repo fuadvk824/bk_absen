@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, SquarePen, Trash2, UserCheck, UserPlus } from 'lucide-react';
+import { MoreHorizontal, SquarePen, Trash2, UserCheck, UserPlus, Users } from 'lucide-react';
 import { route } from 'ziggy-js';
 
 import { Button } from '@/components/ui/button';
@@ -44,19 +44,9 @@ const updateStatus = (id: number) => {
 
 export const columnLeaves = (onEdit: (leave: LeaveList) => void): ColumnDef<LeaveList>[] => [
     {
-        id: 'select',
-
-        header: ({ table }) => (
-            <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} />
-        ),
-        enableSorting: false,
-        enableHiding: false,
+        id: 'nomor',
+        header: () => <div className="flex w-10! items-center justify-center">No.</div>,
+        cell: ({ row }) => <div className="w-10! text-center">{row.index + 1}.</div>,
     },
 
     {
@@ -110,6 +100,19 @@ export const columnLeaves = (onEdit: (leave: LeaveList) => void): ColumnDef<Leav
                         <DropdownMenuItem
                             onClick={() =>
                                 router.get(
+                                    route('leave.balances', {
+                                        leave: leave.id,
+                                    }),
+                                )
+                            }
+                            className="cursor-pointer"
+                        >
+                            <Users className="h-4 w-4" />
+                            Sisa Cuti
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() =>
+                                router.get(
                                     route('leaveassign.edit', {
                                         leave: leave.id,
                                     }),
@@ -120,7 +123,6 @@ export const columnLeaves = (onEdit: (leave: LeaveList) => void): ColumnDef<Leav
                             <UserPlus />
                             Assign
                         </DropdownMenuItem>
-
                         <DropdownMenuItem onClick={() => onEdit(leave)} className="text-gray-500\ cursor-pointer">
                             <SquarePen className="text-gray-500" /> Edit
                         </DropdownMenuItem>

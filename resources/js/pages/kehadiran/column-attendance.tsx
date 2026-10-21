@@ -45,18 +45,9 @@ const updateApproval = (id: number, status: 'approved' | 'rejected') => {
 
 export const columnAttendances: ColumnDef<AttendanceList>[] = [
     {
-        id: 'select',
-        header: ({ table }) => (
-            <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} />
-        ),
-        enableSorting: false,
-        enableHiding: false,
+        id: 'nomor',
+        header: () => <div className="flex w-10! items-center justify-center">No.</div>,
+        cell: ({ row }) => <div className="w-10! text-center">{row.index + 1}.</div>,
     },
 
     {
@@ -320,7 +311,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
                   : 'bg-gray-100 text-gray-700';
 
             return (
-                <div className="flex flex-col text-xs gap-2">
+                <div className="flex flex-col gap-2 text-xs">
                     <div className="flex items-center gap-1">
                         <span className={`w-fit rounded-md px-2 py-1 text-xs font-medium ${waktuClass}`}>
                             {isTepatWaktu ? 'Tepat Waktu' : isLebihCepat ? 'Lebih Cepat' : '-'}
@@ -331,7 +322,7 @@ export const columnAttendances: ColumnDef<AttendanceList>[] = [
                         </span>
                     </div>
 
-                    <div className="flex flex-col rounded-md border bg-white p-2 text-muted-foreground min-w-52">
+                    <div className="flex min-w-52 flex-col rounded-md border bg-white p-2 text-muted-foreground">
                         <span className="text-black underline">Alasan pulang cepat:</span>
                         {early_reason}
                     </div>

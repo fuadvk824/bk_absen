@@ -49,7 +49,7 @@ class OvertimeRateController extends Controller
         });
 
         return redirect()
-            ->route('overtime-rate.index')
+            ->route('kategori-lembur.index')
             ->with('success', 'Data tarif lembur berhasil ditambahkan.');
     }
 
@@ -67,7 +67,7 @@ class OvertimeRateController extends Controller
         });
 
         return redirect()
-            ->route('overtime-rate.index')
+            ->route('kategori-lembur.index')
             ->with('success', 'Data tarif lembur berhasil diperbarui.');
     }
 
@@ -76,7 +76,7 @@ class OvertimeRateController extends Controller
         $overtimeRate->delete();
 
         return redirect()
-            ->route('overtime-rate.index')
+            ->route('kategori-lembur.index')
             ->with('success', 'Data tarif lembur berhasil dihapus.');
     }
 }
