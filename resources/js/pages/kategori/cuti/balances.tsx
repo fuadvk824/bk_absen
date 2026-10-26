@@ -2,7 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { useRef, useState } from 'react';
 import type { VisibilityState } from '@tanstack/react-table';
-import { ArrowLeft, RefreshCw, Search, X } from 'lucide-react';
+import { RefreshCw, Search, X } from 'lucide-react';
 
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,11 @@ import { columnBalance, LeaveBalanceList } from './column-balances';
 import { PaginationMeta } from '@/types/pagination';
 import { DataTable } from '@/components/table/datatable';
 
+type OfficeOption = {
+    id: number;
+    office_code: string;
+    name: string;
+};
 interface Props {
     leave: {
         id: number;
@@ -27,10 +32,12 @@ interface Props {
         year?: number;
         perPage?: number;
         search?: string;
+        office_id: number | null;
     };
+    offices: OfficeOption[];
 }
 
-export default function LeaveBalancesIndex({ leave, balances, filters }: Props) {
+export default function LeaveBalancesIndex({ leave, balances, filters, offices }: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
     const [localFilters, setLocalFilters] = useState({
@@ -101,6 +108,22 @@ export default function LeaveBalancesIndex({ leave, balances, filters }: Props) 
         setLocalFilters(nextFilters);
         visitBalances(nextFilters);
     };
+    const handleOfficeChange = (value: string) => {
+        router.get(
+            route('leave.balances', { leave: leave.id }),
+            {
+                year: filters.year,
+                perPage: filters.perPage,
+                search: filters.search,
+                office_id: value === 'all' ? '' : value,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
 
     const handleRefresh = () => {
         if (searchTimeout.current) {
@@ -136,7 +159,6 @@ export default function LeaveBalancesIndex({ leave, balances, filters }: Props) 
                     </div>
 
                     <div className="flex items-center gap-2">
-
                         <Button
                             type="button"
                             variant="outline"
@@ -165,7 +187,28 @@ export default function LeaveBalancesIndex({ leave, balances, filters }: Props) 
                             />
                         </div>
                     </div>
+                    <div className="space-y-1">
+                        <Label>Kantor</Label>
 
+                        <Select
+                            value={filters.office_id?.toString() ?? 'all'}
+                            onValueChange={(value) => handleOfficeChange(value)}
+                        >
+                            <SelectTrigger className="h-7 p-4">
+                                <SelectValue placeholder="Pilih kantor" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                <SelectItem value="all">Semua Kantor</SelectItem>
+
+                                {offices.map((office) => (
+                                    <SelectItem key={office.id} value={office.id.toString()}>
+                                        {office.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <div className="space-y-1">
                         <Label className="text-[11px]">Tahun Cuti</Label>
 

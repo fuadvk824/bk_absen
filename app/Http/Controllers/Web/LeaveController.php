@@ -8,6 +8,7 @@ use App\Http\Resources\Web\LeaveBalanceResource;
 use App\Http\Resources\Web\LeaveResource;
 use App\Models\LeaveBalance;
 use App\Models\LeaveCategory;
+use App\Models\Office;
 use App\Services\CodeGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,14 +42,21 @@ class LeaveController extends Controller
         $search = trim($request->string('search')->toString());
 
         $year = max(2000, min($year, 2100));
-        $perPage = in_array($perPage, [10, 25, 50, 100], true)
+        $perPage = in_array($perPage, [10, 25, 50, 100, 500], true)
             ? $perPage
             : 10;
-
+        $officeId = $request->input('office_id');
         $balances = LeaveBalance::query()
-            ->with('employee')
+            ->with([
+                'employee.office',
+            ])
             ->where('leave_category_id', $leave->id)
             ->where('year', $year)
+            ->when($officeId, function ($query) use ($officeId) {
+                $query->whereHas('employee', function ($employeeQuery) use ($officeId) {
+                    $employeeQuery->where('office_id', $officeId);
+                });
+            })
             ->when(
                 mb_strlen($search) >= 3,
                 function ($query) use ($search) {
@@ -70,10 +78,15 @@ class LeaveController extends Controller
             'balances' => LeaveBalanceResource::collection($balances)
                 ->response()
                 ->getData(true),
+            'offices' => Office::query()
+                ->select('id', 'office_code', 'name')
+                ->orderBy('name', 'asc')
+                ->get(),
             'filters' => [
                 'year' => $year,
                 'perPage' => $perPage,
                 'search' => mb_strlen($search) >= 3 ? $search : '',
+                'office_id' => $officeId,
             ],
         ]);
     }

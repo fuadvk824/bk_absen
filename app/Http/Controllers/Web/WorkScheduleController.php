@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Web\EmployeeWorkScheduleResource;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Office;
+use App\Models\Position;
 use App\Models\Shift;
 use App\Models\WorkScheduleDay;
 use Carbon\Carbon;
@@ -31,6 +33,8 @@ class WorkScheduleController extends Controller
 
         $search = $request->get('search');
         $officeId = $request->get('office_id');
+        $departmentId = $request->get('department_id');
+        $positionId = $request->get('position_id');
 
         $periodStart = Carbon::create($year, $month, 26);
         $periodEnd = $periodStart->copy()->addMonth()->day(25);
@@ -56,6 +60,12 @@ class WorkScheduleController extends Controller
             ->when($officeId, function ($q) use ($officeId) {
                 $q->where('office_id', $officeId);
             })
+            ->when($departmentId, function ($q) use ($departmentId) {
+                $q->where('department_id', $departmentId);
+            })
+            ->when($positionId, function ($q) use ($positionId) {
+                $q->where('position_id', $positionId);
+            })
             ->with([
                 'shift:id,name_shift',
                 'workSchedules' => function ($q) use ($periodStart, $periodEnd) {
@@ -79,6 +89,8 @@ class WorkScheduleController extends Controller
             'filters' => [
                 'search' => $search,
                 'office_id' => $officeId,
+                'department_id' => $departmentId,
+                'position_id' => $positionId,
                 'month' => (int) $month,
                 'year' => (int) $year,
                 'perPage' => (int) $perPage,
@@ -86,6 +98,8 @@ class WorkScheduleController extends Controller
             'periodDates' => $periodDates,
             'periodLabel' => $periodLabel,
             'offices' => Office::select('id', 'name')->get(),
+            'departments' => Department::select('id', 'name')->get(),
+            'positions' => Position::select('id', 'name')->get(),
             'shifts' => Shift::select('id', 'name_shift')->get(),
         ]);
     }

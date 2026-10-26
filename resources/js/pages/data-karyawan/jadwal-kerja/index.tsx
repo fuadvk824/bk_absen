@@ -38,17 +38,30 @@ interface Props {
     periodDates: PeriodDate[];
     periodLabel: string;
     offices: Option[];
+    departments: Option[];
+    positions: Option[];
     shifts: Shift[];
     filters: {
         search: string;
         office_id: number;
+        department_id: number;
+        position_id: number;
         month?: number;
         year?: number;
         perPage?: number;
     };
 }
 
-export default function Index({ employees, filters, periodDates, periodLabel, offices, shifts }: Props) {
+export default function Index({
+    employees,
+    filters,
+    periodDates,
+    periodLabel,
+    offices,
+    departments,
+    positions,
+    shifts,
+}: Props) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [isRefreshing, setIsRefreshing] = useState(false);
     const allColumns = ['employee_code', 'employee_name'];
@@ -59,12 +72,16 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
     const [localFilters, setLocalFilters] = useState<{
         search: string;
         office_id?: number;
+        department_id?: number;
+        position_id?: number;
         month: number;
         year: number;
         perPage: number;
     }>({
         search: filters.search ?? '',
         office_id: filters.office_id ?? undefined,
+        department_id: filters.department_id ?? undefined,
+        position_id: filters.position_id ?? undefined,
         month: filters.month ?? defaultMonth,
         year: filters.year ?? new Date().getFullYear(),
         perPage: filters.perPage ?? 10,
@@ -77,30 +94,6 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
         allColumns,
     });
 
-    // const employeesOptimized = employees.data.map((emp) => {
-    //     const schedule = emp.work_schedule?.[0] ?? null;
-    //     const dayMap: Record<string, any> = {};
-
-    //     schedule?.days?.forEach((d) => {
-    //         dayMap[d.work_date] = d;
-    //     });
-
-    //     return {
-    //         ...emp,
-    //         dayMap,
-    //     };
-    // });
-
-    // const bulkRow: WorkSchedule = {
-    //     id: 0,
-    //     name: 'Atur Semua',
-    //     shift: {} as Shift,
-    //     work_schedule: [],
-    //     dayMap: {},
-    //     is_bulk: true,
-    // };
-
-    // const employeesWithBulk = [bulkRow, ...employeesOptimized];
 
     const employeesOptimized = useMemo(() => {
         return employees.data.map((emp) => {
@@ -231,6 +224,44 @@ export default function Index({ employees, filters, periodDates, periodLabel, of
                                 {offices.map((office) => (
                                     <SelectItem key={office.id} value={office.id.toString()}>
                                         {office.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-1">
+                        <Label>Departemen</Label>
+                        <Select
+                            value={localFilters.department_id?.toString() ?? 'all'}
+                            onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'department_id', value)}
+                        >
+                            <SelectTrigger className="h-7 p-4">
+                                <SelectValue placeholder="Pilih departemen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Departemen</SelectItem>
+                                {departments.map((department) => (
+                                    <SelectItem key={department.id} value={department.id.toString()}>
+                                        {department.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-1">
+                        <Label>Jabatan</Label>
+                        <Select
+                            value={localFilters.position_id?.toString() ?? 'all'}
+                            onValueChange={(value) => handleFilterChange(localFilters, setLocalFilters, 'position_id', value)}
+                        >
+                            <SelectTrigger className="h-7 p-4">
+                                <SelectValue placeholder="Pilih jabatan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Jabatan</SelectItem>
+                                {positions.map((position) => (
+                                    <SelectItem key={position.id} value={position.id.toString()}>
+                                        {position.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

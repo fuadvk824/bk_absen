@@ -63,7 +63,7 @@ const updateStatus = (item: OffdayList, status: 'approved' | 'rejected') => {
         },
     );
 };
- 
+
 const getCoworkerDateKey = (item: OffdayList, date: string): string | null => {
     if (item.office_id == null || item.department_id == null || item.position_id == null) {
         return null;
@@ -89,7 +89,6 @@ const getDuplicateDates = (data: OffdayList[]) => {
         });
     });
 
-    
     return new Set([...employeeGroups.entries()].filter(([, employeeIds]) => employeeIds.size > 1).map(([key]) => key));
 };
 
@@ -138,7 +137,25 @@ export const columnOffday = ({
         header: 'Nama Karyawan',
         cell: ({ row }) => <span className="font-medium">{row.original.employee_name}</span>,
     },
+    {
+        accessorKey: 'since',
+        header: 'Tanggal Pengajuan',
+        cell: ({ row }) => {
+            const since = row.original.since;
 
+            if (!since) return '-';
+
+            const [date, time] = since.split(' ');
+            const [year, month, day] = date.split('-');
+
+            return (
+                <div className="flex flex-col">
+                    <span className="text-xs font-medium">{time}</span>
+                    <span className="text-xs text-muted-foreground">{`${day}-${month}-${year}`}</span>
+                </div>
+            );
+        },
+    },
     {
         id: 'dates',
         header: 'Tanggal-Tanggal Libur',
@@ -193,26 +210,6 @@ export const columnOffday = ({
                             </span>
                         );
                     })}
-                </div>
-            );
-        },
-    },
-
-    {
-        accessorKey: 'since',
-        header: 'Tanggal Pengajuan',
-        cell: ({ row }) => {
-            const since = row.original.since;
-
-            if (!since) return '-';
-
-            const [date, time] = since.split(' ');
-            const [year, month, day] = date.split('-');
-
-            return (
-                <div className="flex flex-col">
-                    <span className="text-xs font-medium">{time}</span>
-                    <span className="text-xs text-muted-foreground">{`${day}-${month}-${year}`}</span>
                 </div>
             );
         },
