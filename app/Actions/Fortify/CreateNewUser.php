@@ -7,6 +7,7 @@ use App\Concerns\ProfileValidationRules;
 // use App\Models\Employee;
 use App\Models\User;
 use App\Services\CodeGeneratorService;
+use Illuminate\Validation\ValidationException;
 // use Illuminate\Support\Facades\Validator;
 // use Illuminate\Support\Facades\DB;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
